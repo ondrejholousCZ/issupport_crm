@@ -21,6 +21,8 @@
 | `AZURE_AD_CLIENT_SECRET` | Client secret |
 | `AZURE_AD_TENANT_ID` | Tenant ID |
 | `CRON_SECRET` | `openssl rand -base64 32` |
+| `DAIS_API_BASE_URL` | `https://resvm1.issupport.cz:8443/api/v1` |
+| `DAIS_API_KEY` | API klíč pro lookup IČO |
 
 ## Entra ID — redirect URI pro produkci
 
