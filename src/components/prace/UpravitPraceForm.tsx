@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormField, FormGrid, FormSelect, FormTextarea } from "@/components/ui/FormField";
 import { updatePraceAction } from "@/lib/actions/prace";
 import { formatCasInput } from "@/lib/cas";
+import { toDateIso } from "@/lib/format";
 import { druhCinnostiLabels, stavFakturaceLabels } from "@/lib/labels";
 import type { OdvedenaPrace } from "@/lib/types";
 import { CasInput } from "./CasInput";
@@ -31,7 +32,7 @@ export function UpravitPraceForm({
       <input type="hidden" name="zakaznik_id" value={row.zakaznik_id} />
       <input type="hidden" name="returnTo" value={returnQuery} />
       <FormGrid>
-        <FormField label="Datum" name="datum" type="date" required defaultValue={row.datum.slice(0, 10)} />
+        <FormField label="Datum" name="datum" type="date" required defaultValue={toDateIso(row.datum)} />
         <FormSelect
           label="Projekt"
           name="projekt_id"

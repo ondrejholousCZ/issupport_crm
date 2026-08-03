@@ -11,8 +11,25 @@ const czMoney = new Intl.NumberFormat("cs-CZ", {
 
 import { effectiveWorkHours } from "./work-hours";
 
-export function formatDate(value: string | null | undefined): string {
+/** Normalizuje datum z DB (string nebo Date) na YYYY-MM-DD. */
+export function toDateIso(value: string | Date | null | undefined): string {
+  if (!value) return "";
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return "";
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, "0");
+    const d = String(value.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  return value.slice(0, 10);
+}
+
+export function formatDate(value: string | Date | null | undefined): string {
   if (!value) return "—";
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return "—";
+    return czDate.format(value);
+  }
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return czDate.format(d);

@@ -94,7 +94,7 @@ export interface Sluzba {
 
 export interface OdvedenaPrace {
   id: string;
-  datum: string;
+  datum: string | Date;
   hodiny: number;
   minuty: number;
   druh_cinnosti: DruhCinnosti | null;

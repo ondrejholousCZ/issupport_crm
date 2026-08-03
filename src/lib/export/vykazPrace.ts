@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { druhCinnostiLabels } from "@/lib/labels";
+import { toDateIso } from "@/lib/format";
 import type { OdvedenaPrace } from "@/lib/types";
 import {
   exportCastka,
@@ -7,8 +8,9 @@ import {
   workerInitials,
 } from "@/lib/work-hours";
 
-function parseDatum(value: string): Date {
-  const [y, m, d] = value.slice(0, 10).split("-").map(Number);
+function parseDatum(value: string | Date): Date {
+  const iso = toDateIso(value);
+  const [y, m, d] = iso.split("-").map(Number);
   return new Date(y, m - 1, d, 12, 0, 0);
 }
 
@@ -35,7 +37,7 @@ export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string): string
 
 export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS.Buffer> {
   const sorted = [...rows].sort((a, b) => {
-    const byDate = a.datum.localeCompare(b.datum);
+    const byDate = toDateIso(a.datum).localeCompare(toDateIso(b.datum));
     if (byDate !== 0) return byDate;
     return (a.pracovnik_jmeno ?? "").localeCompare(b.pracovnik_jmeno ?? "");
   });
