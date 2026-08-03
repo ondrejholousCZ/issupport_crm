@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import { FakturySubnav } from "@/components/faktury/FakturySubnav";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -23,6 +24,7 @@ export default async function FakturyPage() {
 
   return (
     <AppShell title="Faktury" actions={<Button href="/faktury/nova">+ Nová faktura</Button>}>
+      <FakturySubnav />
       {rows.length === 0 ? (
         <EmptyState message="Zatím nemáte žádné faktury." />
       ) : (
