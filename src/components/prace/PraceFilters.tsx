@@ -3,7 +3,14 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
-import { currentMesic, praceFiltersToQuery, type PraceFilters } from "@/lib/prace-filters";
+import {
+  buildMesic,
+  MESICE_LABELS,
+  praceFiltersToQuery,
+  rokyProFiltr,
+  splitMesic,
+  type PraceFilters,
+} from "@/lib/prace-filters";
 import { stavFakturaceLabels } from "@/lib/labels";
 
 const controlClass =
@@ -49,6 +56,9 @@ export function PraceFilters({
     if (!filters.zakaznikId) return projekty;
     return projekty.filter((p) => p.zakaznik_id === filters.zakaznikId);
   }, [projekty, filters.zakaznikId]);
+
+  const { rok, mesic: mesicCislo } = splitMesic(filters.mesic);
+  const roky = useMemo(() => rokyProFiltr(), []);
 
   const applyFilters = useCallback(
     (next: Partial<PraceFilters>) => {
@@ -108,14 +118,35 @@ export function PraceFilters({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-end gap-x-3 gap-y-3">
-        <FilterField label="Měsíc" className="w-[148px]">
-          <input
-            type="month"
-            value={filters.mesic}
-            onChange={(e) => applyFilters({ mesic: e.target.value || currentMesic() })}
-            className={controlClass}
-          />
-        </FilterField>
+        <div className="block text-sm w-[248px]">
+          <span className="block text-xs font-medium text-gray-600 mb-1">Měsíc</span>
+          <div className="flex gap-1.5">
+            <select
+              value={rok}
+              onChange={(e) => applyFilters({ mesic: buildMesic(Number(e.target.value), mesicCislo) })}
+              className={`${controlClass} w-[88px]`}
+              aria-label="Rok"
+            >
+              {roky.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+            <select
+              value={mesicCislo}
+              onChange={(e) => applyFilters({ mesic: buildMesic(rok, Number(e.target.value)) })}
+              className={`${controlClass} flex-1`}
+              aria-label="Měsíc"
+            >
+              {MESICE_LABELS.map((label, idx) => (
+                <option key={label} value={idx + 1}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         <FilterField label="Pracovník" className="w-[180px]">
           <select

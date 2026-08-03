@@ -3,6 +3,40 @@ export function currentMesic(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
+export const MESICE_LABELS = [
+  "Leden",
+  "Únor",
+  "Březen",
+  "Duben",
+  "Květen",
+  "Červen",
+  "Červenec",
+  "Srpen",
+  "Září",
+  "Říjen",
+  "Listopad",
+  "Prosinec",
+] as const;
+
+export function splitMesic(mesic: string): { rok: number; mesic: number } {
+  const [rokStr, mesicStr] = mesic.split("-");
+  return {
+    rok: Number(rokStr) || new Date().getFullYear(),
+    mesic: Number(mesicStr) || new Date().getMonth() + 1,
+  };
+}
+
+export function buildMesic(rok: number, mesic: number): string {
+  return `${rok}-${String(mesic).padStart(2, "0")}`;
+}
+
+export function rokyProFiltr(): number[] {
+  const current = new Date().getFullYear();
+  const roky: number[] = [];
+  for (let y = current - 5; y <= current + 1; y++) roky.push(y);
+  return roky;
+}
+
 export type PraceFilters = {
   mesic: string;
   pracovnikId?: string;
