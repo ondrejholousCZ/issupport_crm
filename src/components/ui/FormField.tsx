@@ -46,12 +46,14 @@ export function FormSelect({
   required,
   defaultValue,
   options,
+  onChange,
 }: {
   label: string;
   name: string;
   required?: boolean;
   defaultValue?: string;
   options: { value: string; label: string }[];
+  onChange?: React.ChangeEventHandler<HTMLSelectElement>;
 }) {
   return (
     <FormField label={label} name={name} required={required}>
@@ -59,6 +61,7 @@ export function FormSelect({
         name={name}
         required={required}
         defaultValue={defaultValue}
+        onChange={onChange}
         className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
       >
         {options.map((opt) => (

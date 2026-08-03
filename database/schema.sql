@@ -73,6 +73,8 @@ CREATE TABLE crmissp.projekt (
   datum_od              DATE,
   datum_do              DATE,
   hodinova_sazba_fak    NUMERIC(12,2) CHECK (hodinova_sazba_fak >= 0),
+  jednotka_sazby        VARCHAR(10) NOT NULL DEFAULT 'hodina'
+                          CHECK (jednotka_sazby IN ('hodina', 'md')),
   mena                  VARCHAR(10) NOT NULL DEFAULT 'CZK',
   stav                  VARCHAR(20) NOT NULL DEFAULT 'aktivni'
                           CHECK (stav IN ('aktivni', 'pozastaven', 'uzavren')),
@@ -221,13 +223,31 @@ RETURNS TRIGGER AS $$
 DECLARE
   v_sazba_fak NUMERIC(12,2);
   v_naklad NUMERIC(12,2);
-  v_cas NUMERIC(10,4);
+  v_jednotka VARCHAR(10);
+  v_effective_hours NUMERIC(10,4);
+  v_billing_units NUMERIC(10,4);
 BEGIN
-  v_cas := NEW.hodiny + (NEW.minuty::NUMERIC / 60);
-  SELECT hodinova_sazba_fak INTO v_sazba_fak FROM crmissp.projekt WHERE id = NEW.projekt_id;
+  IF NEW.hodiny = 0 AND NEW.minuty = 0 THEN
+    v_effective_hours := 8;
+  ELSE
+    v_effective_hours := NEW.hodiny + (NEW.minuty::NUMERIC / 60);
+  END IF;
+
+  SELECT hodinova_sazba_fak, COALESCE(jednotka_sazby, 'hodina')
+  INTO v_sazba_fak, v_jednotka
+  FROM crmissp.projekt
+  WHERE id = NEW.projekt_id;
+
+  IF v_jednotka = 'md' THEN
+    v_billing_units := v_effective_hours / 8.0;
+  ELSE
+    v_billing_units := v_effective_hours;
+  END IF;
+
   SELECT naklad_na_hodinu INTO v_naklad FROM crmissp.pracovnik WHERE id = NEW.pracovnik_id;
-  NEW.castka_fakturace := ROUND(v_cas * COALESCE(v_sazba_fak, 0), 2);
-  NEW.castka_naklady := ROUND(v_cas * COALESCE(v_naklad, 0), 2);
+
+  NEW.castka_fakturace := ROUND(v_billing_units * COALESCE(v_sazba_fak, 0), 2);
+  NEW.castka_naklady := ROUND(v_effective_hours * COALESCE(v_naklad, 0), 2);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -236,6 +256,21 @@ CREATE TRIGGER trg_prace_calc_castky
   BEFORE INSERT OR UPDATE OF hodiny, minuty, projekt_id, pracovnik_id
   ON crmissp.odvedena_prace
   FOR EACH ROW EXECUTE FUNCTION crmissp.calc_odvedena_prace_castky();
+
+CREATE OR REPLACE FUNCTION crmissp.recalc_projekt_prace_castky()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF OLD.hodinova_sazba_fak IS DISTINCT FROM NEW.hodinova_sazba_fak
+     OR OLD.jednotka_sazby IS DISTINCT FROM NEW.jednotka_sazby THEN
+    UPDATE crmissp.odvedena_prace SET hodiny = hodiny WHERE projekt_id = NEW.id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_projekt_recalc_prace
+  AFTER UPDATE OF hodinova_sazba_fak, jednotka_sazby ON crmissp.projekt
+  FOR EACH ROW EXECUTE FUNCTION crmissp.recalc_projekt_prace_castky();
 
 -- ============================================================================
 -- 7. USERS (auth — NextAuth Credentials, oddělené od FaktuMatch)

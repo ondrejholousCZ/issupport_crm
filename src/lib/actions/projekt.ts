@@ -18,6 +18,7 @@ function parse(formData: FormData) {
     datum_od: formOptStr(formData, "datum_od"),
     datum_do: formOptStr(formData, "datum_do"),
     hodinova_sazba_fak: formOptStr(formData, "hodinova_sazba_fak"),
+    jednotka_sazby: formStr(formData, "jednotka_sazby") || "hodina",
     mena: formStr(formData, "mena") || "CZK",
     stav: formStr(formData, "stav") || "aktivni",
   };

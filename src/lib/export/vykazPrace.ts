@@ -79,6 +79,7 @@ export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS
       row.minuty,
       row.projekt_sazba_fak,
       row.castka_fakturace,
+      row.projekt_jednotka_sazby ?? "hodina",
     );
     sumHours += hoursFrac;
     sumCena += cena;

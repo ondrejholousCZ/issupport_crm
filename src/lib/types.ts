@@ -3,6 +3,7 @@ export type UserRole = "admin" | "user";
 export type ZakaznikStav = "aktivni" | "neaktivni";
 export type PracovnikTyp = "zamestnanec" | "dodavatel";
 export type ProjektStav = "aktivni" | "pozastaven" | "uzavren";
+export type ProjektJednotkaSazby = "hodina" | "md";
 export type FakturaStav = "rozpracovana" | "vystavena" | "uhrazena" | "po_splatnosti" | "storno";
 export type FakturaTyp = "projektova" | "servisni" | "zaloha" | "dobropis";
 export type SluzbaFrekvence = "mesicne" | "kvartalne" | "pololetne" | "rocne" | "vlastni";
@@ -47,6 +48,7 @@ export interface Projekt {
   datum_od: string | null;
   datum_do: string | null;
   hodinova_sazba_fak: string | null;
+  jednotka_sazby: ProjektJednotkaSazby;
   mena: string;
   stav: ProjektStav;
   created_at: string;
@@ -113,6 +115,7 @@ export interface OdvedenaPrace {
   projekt_nazev?: string;
   projekt_zakazka?: string | null;
   projekt_sazba_fak?: string | null;
+  projekt_jednotka_sazby?: ProjektJednotkaSazby;
   pracovnik_jmeno?: string;
   pracovnik_jmeno_krestni?: string;
   pracovnik_prijmeni?: string;

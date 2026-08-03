@@ -57,6 +57,7 @@ export function UpravitProjektModal({
           datum_od: editRow.datum_od ?? "",
           datum_do: editRow.datum_do ?? "",
           hodinova_sazba_fak: editRow.hodinova_sazba_fak ?? "",
+          jednotka_sazby: editRow.jednotka_sazby ?? "hodina",
           mena: editRow.mena,
           stav: editRow.stav,
         }}

@@ -33,12 +33,13 @@ export async function createProjekt(data: {
   datum_od?: string;
   datum_do?: string;
   hodinova_sazba_fak?: string;
+  jednotka_sazby?: string;
   mena: string;
   stav: string;
 }) {
   const result = await query<Projekt>(
-    `INSERT INTO projekt (nazev_projektu, zakazka, zakaznik_id, datum_od, datum_do, hodinova_sazba_fak, mena, stav)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+    `INSERT INTO projekt (nazev_projektu, zakazka, zakaznik_id, datum_od, datum_do, hodinova_sazba_fak, jednotka_sazby, mena, stav)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
     [
       data.nazev_projektu,
       data.zakazka || null,
@@ -46,6 +47,7 @@ export async function createProjekt(data: {
       data.datum_od || null,
       data.datum_do || null,
       data.hodinova_sazba_fak || null,
+      data.jednotka_sazby || "hodina",
       data.mena,
       data.stav,
     ],
@@ -62,6 +64,7 @@ export async function updateProjekt(
     datum_od?: string;
     datum_do?: string;
     hodinova_sazba_fak?: string;
+    jednotka_sazby?: string;
     mena: string;
     stav: string;
   },
@@ -69,7 +72,7 @@ export async function updateProjekt(
   const result = await query<Projekt>(
     `UPDATE projekt SET
       nazev_projektu = $2, zakazka = $3, zakaznik_id = $4, datum_od = $5, datum_do = $6,
-      hodinova_sazba_fak = $7, mena = $8, stav = $9
+      hodinova_sazba_fak = $7, jednotka_sazby = $8, mena = $9, stav = $10
      WHERE id = $1 RETURNING *`,
     [
       id,
@@ -79,6 +82,7 @@ export async function updateProjekt(
       data.datum_od || null,
       data.datum_do || null,
       data.hodinova_sazba_fak || null,
+      data.jednotka_sazby || "hodina",
       data.mena,
       data.stav,
     ],

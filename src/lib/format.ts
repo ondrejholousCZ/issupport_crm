@@ -10,6 +10,7 @@ const czMoney = new Intl.NumberFormat("cs-CZ", {
 });
 
 import { effectiveWorkHours } from "./work-hours";
+import type { ProjektJednotkaSazby } from "./types";
 
 /** Normalizuje datum z DB (string nebo Date) na YYYY-MM-DD. */
 export function toDateIso(value: string | Date | null | undefined): string {
@@ -40,6 +41,15 @@ export function formatMoney(value: string | number | null | undefined, mena = "C
   const num = typeof value === "string" ? Number(value) : value;
   if (Number.isNaN(num)) return "—";
   return `${czMoney.format(num)} ${mena}`;
+}
+
+export function formatProjektSazba(
+  sazba: string | number | null | undefined,
+  mena: string,
+  jednotka: ProjektJednotkaSazby = "hodina",
+): string {
+  const suffix = jednotka === "md" ? "/MD" : "/h";
+  return `${formatMoney(sazba, mena)}${suffix}`;
 }
 
 export function formatCas(hodiny: number, minuty: number): string {

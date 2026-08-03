@@ -50,6 +50,7 @@ export async function listPrace(filters?: {
             p.nazev_projektu AS projekt_nazev,
             p.zakazka AS projekt_zakazka,
             p.hodinova_sazba_fak AS projekt_sazba_fak,
+            p.jednotka_sazby AS projekt_jednotka_sazby,
             pr.jmeno AS pracovnik_jmeno_krestni,
             pr.prijmeni AS pracovnik_prijmeni,
             CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno
@@ -72,6 +73,7 @@ export async function getPrace(id: string): Promise<OdvedenaPrace | null> {
             p.nazev_projektu AS projekt_nazev,
             p.zakazka AS projekt_zakazka,
             p.hodinova_sazba_fak AS projekt_sazba_fak,
+            p.jednotka_sazby AS projekt_jednotka_sazby,
             pr.jmeno AS pracovnik_jmeno_krestni,
             pr.prijmeni AS pracovnik_prijmeni,
             CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno

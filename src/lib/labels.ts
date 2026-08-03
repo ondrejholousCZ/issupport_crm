@@ -3,6 +3,7 @@ import type {
   FakturaStav,
   FakturaTyp,
   PracovnikTyp,
+  ProjektJednotkaSazby,
   ProjektStav,
   SluzbaFrekvence,
   SluzbaStav,
@@ -24,6 +25,11 @@ export const projektStavLabels: Record<ProjektStav, string> = {
   aktivni: "Aktivní",
   pozastaven: "Pozastaven",
   uzavren: "Uzavřen",
+};
+
+export const projektJednotkaSazbyLabels: Record<ProjektJednotkaSazby, string> = {
+  hodina: "Hodina (h)",
+  md: "MD (8 h)",
 };
 
 export const fakturaStavLabels: Record<FakturaStav, string> = {

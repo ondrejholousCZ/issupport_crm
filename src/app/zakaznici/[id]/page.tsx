@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { deleteZakaznikAction } from "@/lib/actions/zakaznik";
 import { requireSession } from "@/lib/auth/require-session";
-import { formatDate, formatMoney } from "@/lib/format";
+import { formatDate, formatMoney, formatProjektSazba } from "@/lib/format";
 import {
   fakturaStavLabels,
   projektStavLabels,
@@ -95,7 +95,7 @@ export default async function ZakaznikDetailPage({
                 rows={projekty.map((p) => [
                   <Link key={p.id} href={`/projekty?upravit=${p.id}`} className="text-primary hover:underline">{p.nazev_projektu}</Link>,
                   p.zakazka ?? "—",
-                  formatMoney(p.hodinova_sazba_fak, p.mena),
+                  formatProjektSazba(p.hodinova_sazba_fak, p.mena, p.jednotka_sazby ?? "hodina"),
                   projektStavLabels[p.stav],
                 ])}
               />

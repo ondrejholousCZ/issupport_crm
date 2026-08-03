@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormField, FormGrid, FormSelect } from "@/components/ui/FormField";
-import { projektStavLabels } from "@/lib/labels";
+import { projektJednotkaSazbyLabels, projektStavLabels } from "@/lib/labels";
+import type { ProjektJednotkaSazby } from "@/lib/types";
 
 export type ProjektFormValues = {
   nazev_projektu?: string;
@@ -12,6 +14,7 @@ export type ProjektFormValues = {
   datum_od?: string;
   datum_do?: string;
   hodinova_sazba_fak?: string;
+  jednotka_sazby?: ProjektJednotkaSazby;
   mena?: string;
   stav?: string;
 };
@@ -29,6 +32,10 @@ export function ProjektForm({
   onCancel: () => void;
   defaultValues?: ProjektFormValues;
 }) {
+  const [jednotka, setJednotka] = useState<ProjektJednotkaSazby>(
+    defaultValues.jednotka_sazby ?? "hodina",
+  );
+
   return (
     <form action={action} className="space-y-4">
       <FormGrid>
@@ -57,12 +64,23 @@ export function ProjektForm({
         />
         <FormField label="Datum od" name="datum_od" type="date" defaultValue={defaultValues.datum_od ?? ""} />
         <FormField label="Datum do" name="datum_do" type="date" defaultValue={defaultValues.datum_do ?? ""} />
+        <FormSelect
+          label="Jednotka sazby"
+          name="jednotka_sazby"
+          defaultValue={defaultValues.jednotka_sazby ?? "hodina"}
+          options={Object.entries(projektJednotkaSazbyLabels).map(([value, label]) => ({
+            value,
+            label,
+          }))}
+          onChange={(e) => setJednotka(e.target.value as ProjektJednotkaSazby)}
+        />
         <FormField
-          label="Hodinová sazba fakturace"
+          label={jednotka === "md" ? "Sazba fakturace (Kč/MD)" : "Sazba fakturace (Kč/h)"}
           name="hodinova_sazba_fak"
           type="number"
           step="0.01"
           defaultValue={defaultValues.hodinova_sazba_fak ?? ""}
+          hint={jednotka === "md" ? "Práce se zadává v hodinách, fakturace se počítá v MD (1 MD = 8 h)" : undefined}
         />
         <FormField label="Měna" name="mena" defaultValue={defaultValues.mena ?? "CZK"} />
         <FormSelect

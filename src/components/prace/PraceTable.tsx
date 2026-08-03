@@ -20,6 +20,7 @@ function displayCastka(row: OdvedenaPrace): string {
     row.minuty,
     row.projekt_sazba_fak,
     row.castka_fakturace,
+    row.projekt_jednotka_sazby ?? "hodina",
   );
   return formatMoney(amount);
 }

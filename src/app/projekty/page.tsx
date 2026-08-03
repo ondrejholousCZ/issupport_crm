@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireSession } from "@/lib/auth/require-session";
-import { formatDate, formatMoney } from "@/lib/format";
+import { formatDate, formatProjektSazba } from "@/lib/format";
 import { projektStavLabels } from "@/lib/labels";
 import { getProjekt, listProjekty } from "@/lib/queries/projekt";
 import { listZakaznikOptions } from "@/lib/queries/zakaznik";
@@ -75,7 +75,9 @@ export default async function ProjektyPage({
                   <td className="px-4 py-3">
                     {formatDate(row.datum_od)} – {formatDate(row.datum_do)}
                   </td>
-                  <td className="px-4 py-3">{formatMoney(row.hodinova_sazba_fak, row.mena)}</td>
+                  <td className="px-4 py-3">
+                    {formatProjektSazba(row.hodinova_sazba_fak, row.mena, row.jednotka_sazby ?? "hodina")}
+                  </td>
                   <td className="px-4 py-3">
                     <StatusBadge label={projektStavLabels[row.stav]} tone={row.stav === "aktivni" ? "green" : "yellow"} />
                   </td>

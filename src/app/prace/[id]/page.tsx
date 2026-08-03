@@ -57,7 +57,13 @@ export default async function PraceDetailPage({
           <p>
             <span className="text-gray-500">Fakturace:</span>{" "}
             {formatMoney(
-              exportCastka(row.hodiny, row.minuty, row.projekt_sazba_fak, row.castka_fakturace),
+              exportCastka(
+                row.hodiny,
+                row.minuty,
+                row.projekt_sazba_fak,
+                row.castka_fakturace,
+                row.projekt_jednotka_sazby ?? "hodina",
+              ),
             )}
           </p>
           <p><span className="text-gray-500">Druh:</span> {row.druh_cinnosti ? druhCinnostiLabels[row.druh_cinnosti] : "—"}</p>
