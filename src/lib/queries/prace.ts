@@ -6,6 +6,7 @@ export async function listPrace(filters?: {
   projektId?: string;
   mesic?: string;
   pracovnikId?: string;
+  stavFakturace?: string;
 }): Promise<OdvedenaPrace[]> {
   const clauses: string[] = [];
   const params: string[] = [];
@@ -27,6 +28,10 @@ export async function listPrace(filters?: {
   if (filters?.pracovnikId) {
     params.push(filters.pracovnikId);
     clauses.push(`op.pracovnik_id = $${params.length}`);
+  }
+  if (filters?.stavFakturace) {
+    params.push(filters.stavFakturace);
+    clauses.push(`op.stav_fakturace = $${params.length}`);
   }
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
@@ -149,4 +154,12 @@ export async function deletePrace(id: string) {
 export async function deletePraceBulk(ids: string[]) {
   if (ids.length === 0) return;
   await query(`DELETE FROM odvedena_prace WHERE id = ANY($1::uuid[])`, [ids]);
+}
+
+export async function updatePraceStavBulk(ids: string[], stavFakturace: string) {
+  if (ids.length === 0) return;
+  await query(
+    `UPDATE odvedena_prace SET stav_fakturace = $2 WHERE id = ANY($1::uuid[])`,
+    [ids, stavFakturace],
+  );
 }

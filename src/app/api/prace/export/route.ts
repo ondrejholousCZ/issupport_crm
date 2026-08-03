@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { buildVykazFilename, buildVykazWorkbook } from "@/lib/export/vykazPrace";
+import { currentMesic } from "@/lib/prace-filters";
 import { listPrace } from "@/lib/queries/prace";
 
 export const runtime = "nodejs";
@@ -11,26 +12,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const mesic = request.nextUrl.searchParams.get("mesic");
-  if (!mesic || !/^\d{4}-\d{2}$/.test(mesic)) {
+  const sp = request.nextUrl.searchParams;
+  const mesic = sp.get("mesic");
+  if (mesic && !/^\d{4}-\d{2}$/.test(mesic)) {
     return NextResponse.json({ error: "Neplatný parametr mesic (YYYY-MM)" }, { status: 400 });
   }
 
-  const pracovnikId = request.nextUrl.searchParams.get("pracovnik_id") ?? undefined;
-  const zakaznikId = request.nextUrl.searchParams.get("zakaznik_id") ?? undefined;
-
   const rows = await listPrace({
-    mesic,
-    pracovnikId,
-    zakaznikId,
+    mesic: mesic ?? currentMesic(),
+    pracovnikId: sp.get("pracovnik") ?? undefined,
+    projektId: sp.get("projekt") ?? undefined,
+    zakaznikId: sp.get("zakaznik") ?? undefined,
+    stavFakturace: sp.get("stav") ?? undefined,
   });
 
   if (rows.length === 0) {
-    return NextResponse.json({ error: "Pro zvolené období nejsou žádné záznamy." }, { status: 404 });
+    return NextResponse.json({ error: "Pro zvolené filtry nejsou žádné záznamy." }, { status: 404 });
   }
 
   const buffer = await buildVykazWorkbook(rows);
-  const filename = buildVykazFilename(rows, mesic);
+  const filename = buildVykazFilename(rows, mesic ?? currentMesic());
 
   return new NextResponse(buffer, {
     headers: {

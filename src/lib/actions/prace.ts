@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/require-session";
 import { parseCas } from "@/lib/cas";
 import { formInt, formOptStr, formStr } from "@/lib/form";
-import { createPrace, deletePrace, deletePraceBulk, updatePrace } from "@/lib/queries/prace";
+import { createPrace, deletePrace, deletePraceBulk, updatePrace, updatePraceStavBulk } from "@/lib/queries/prace";
 
 async function guard() {
   if (!(await requireSession())) redirect("/login");
@@ -77,7 +77,7 @@ export async function updatePraceAction(id: string, formData: FormData) {
   };
   await updatePrace(id, parsed);
   revalidatePath("/prace");
-  redirect("/prace");
+  return redirectPrace(formData);
 }
 
 export async function deletePraceAction(id: string) {
@@ -87,11 +87,26 @@ export async function deletePraceAction(id: string) {
   redirect("/prace");
 }
 
+async function redirectPrace(formData: FormData) {
+  const returnTo = formOptStr(formData, "returnTo");
+  redirect(returnTo ? `/prace?${returnTo}` : "/prace");
+}
+
 export async function deletePraceBulkAction(formData: FormData) {
   await guard();
   const ids = formData.getAll("ids").map(String).filter(Boolean);
-  if (ids.length === 0) redirect("/prace");
+  if (ids.length === 0) return redirectPrace(formData);
   await deletePraceBulk(ids);
   revalidatePath("/prace");
-  redirect("/prace");
+  return redirectPrace(formData);
+}
+
+export async function updatePraceStavBulkAction(formData: FormData) {
+  await guard();
+  const ids = formData.getAll("ids").map(String).filter(Boolean);
+  const stav = formStr(formData, "stav_fakturace");
+  if (ids.length === 0 || !stav) return redirectPrace(formData);
+  await updatePraceStavBulk(ids, stav);
+  revalidatePath("/prace");
+  return redirectPrace(formData);
 }

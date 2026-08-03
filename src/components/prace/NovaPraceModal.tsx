@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { DraggableModal } from "@/components/ui/DraggableModal";
 import { Button } from "@/components/ui/Button";
@@ -20,6 +20,7 @@ export function NovaPraceModalTrigger({
   defaultProjekt?: string;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(defaultOpen);
 
   useEffect(() => {
@@ -28,8 +29,11 @@ export function NovaPraceModalTrigger({
 
   const close = useCallback(() => {
     setOpen(false);
-    router.replace("/prace", { scroll: false });
-  }, [router]);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("nova");
+    const qs = params.toString();
+    router.replace(qs ? `/prace?${qs}` : "/prace", { scroll: false });
+  }, [router, searchParams]);
 
   const launch = useCallback(() => {
     setOpen(true);

@@ -15,11 +15,13 @@ export function UpravitPraceForm({
   row,
   projekty,
   pracovnici,
+  returnQuery = "",
   onCancel,
 }: {
   row: OdvedenaPrace;
   projekty: Option[];
   pracovnici: Option[];
+  returnQuery?: string;
   onCancel: () => void;
 }) {
   const update = updatePraceAction.bind(null, row.id);
@@ -27,6 +29,7 @@ export function UpravitPraceForm({
   return (
     <form action={update} className="space-y-4">
       <input type="hidden" name="zakaznik_id" value={row.zakaznik_id} />
+      <input type="hidden" name="returnTo" value={returnQuery} />
       <FormGrid>
         <FormField label="Datum" name="datum" type="date" required defaultValue={row.datum.slice(0, 10)} />
         <FormSelect

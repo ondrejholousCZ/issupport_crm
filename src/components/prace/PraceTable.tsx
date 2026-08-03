@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { deletePraceBulkAction } from "@/lib/actions/prace";
+import { deletePraceBulkAction, updatePraceStavBulkAction } from "@/lib/actions/prace";
 import type { OdvedenaPrace } from "@/lib/types";
 import { formatCas, formatDate, formatMoney } from "@/lib/format";
 import { stavFakturaceLabels } from "@/lib/labels";
@@ -10,6 +10,9 @@ import { exportCastka } from "@/lib/work-hours";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+
+const bulkSelectClass =
+  "h-[38px] rounded-lg border border-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30";
 
 function displayCastka(row: OdvedenaPrace): string {
   const amount = exportCastka(
@@ -21,7 +24,13 @@ function displayCastka(row: OdvedenaPrace): string {
   return formatMoney(amount);
 }
 
-export function PraceTable({ rows }: { rows: OdvedenaPrace[] }) {
+export function PraceTable({
+  rows,
+  returnQuery,
+}: {
+  rows: OdvedenaPrace[];
+  returnQuery: string;
+}) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const allIds = useMemo(() => rows.map((r) => r.id), [rows]);
   const allSelected = rows.length > 0 && selected.size === rows.length;
@@ -43,19 +52,41 @@ export function PraceTable({ rows }: { rows: OdvedenaPrace[] }) {
   return (
     <div className="space-y-3">
       {someSelected ? (
-        <form
-          action={deletePraceBulkAction}
-          onSubmit={(e) => {
-            if (!confirm(`Opravdu smazat ${selected.size} vybraných záznamů?`)) {
-              e.preventDefault();
-            }
-          }}
-          className="flex items-center gap-3"
-        >
-          {[...selected].map((id) => (
-            <input key={id} type="hidden" name="ids" value={id} />
-          ))}
-          <SubmitButton variant="danger">Smazat vybrané ({selected.size})</SubmitButton>
+        <div className="flex flex-wrap items-center gap-3">
+          <form
+            action={updatePraceStavBulkAction}
+            className="flex items-center gap-2"
+          >
+            {[...selected].map((id) => (
+              <input key={id} type="hidden" name="ids" value={id} />
+            ))}
+            <input type="hidden" name="returnTo" value={returnQuery} />
+            <select name="stav_fakturace" required className={bulkSelectClass} defaultValue="fakturovano">
+              {Object.entries(stavFakturaceLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <SubmitButton variant="secondary">Změnit stav ({selected.size})</SubmitButton>
+          </form>
+
+          <form
+            action={deletePraceBulkAction}
+            onSubmit={(e) => {
+              if (!confirm(`Opravdu smazat ${selected.size} vybraných záznamů?`)) {
+                e.preventDefault();
+              }
+            }}
+            className="flex items-center gap-2"
+          >
+            {[...selected].map((id) => (
+              <input key={id} type="hidden" name="ids" value={id} />
+            ))}
+            <input type="hidden" name="returnTo" value={returnQuery} />
+            <SubmitButton variant="danger">Smazat ({selected.size})</SubmitButton>
+          </form>
+
           <button
             type="button"
             onClick={() => setSelected(new Set())}
@@ -63,7 +94,7 @@ export function PraceTable({ rows }: { rows: OdvedenaPrace[] }) {
           >
             Zrušit výběr
           </button>
-        </form>
+        </div>
       ) : null}
 
       <Card className="overflow-hidden">
@@ -131,7 +162,7 @@ export function PraceTable({ rows }: { rows: OdvedenaPrace[] }) {
                 </td>
                 <td className="px-3 py-3">
                   <Link
-                    href={`/prace?upravit=${row.id}`}
+                    href={`/prace?${returnQuery ? `${returnQuery}&` : ""}upravit=${row.id}`}
                     className="text-primary hover:underline text-xs font-medium"
                   >
                     Upravit
