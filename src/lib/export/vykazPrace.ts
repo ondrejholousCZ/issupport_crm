@@ -96,7 +96,7 @@ export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS
   const emptyRows = 2;
   for (let i = 0; i < emptyRows; i++) ws.addRow([]);
 
-  const sumRow = ws.addRow({
+  ws.addRow({
     num: "",
     datum: "",
     zakazka: "",
