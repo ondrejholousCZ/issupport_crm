@@ -1,15 +1,20 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { AppShell } from "@/components/AppShell";
 import { FakturySubnav } from "@/components/faktury/FakturySubnav";
-import { Button } from "@/components/ui/Button";
+import { NovaFakturaModalTrigger } from "@/components/faktury/NovaFakturaModal";
+import { UpravitFakturaModal } from "@/components/faktury/UpravitFakturaModal";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireSession } from "@/lib/auth/require-session";
 import { formatDate, formatMoney } from "@/lib/format";
 import { fakturaStavLabels } from "@/lib/labels";
-import { listFaktury } from "@/lib/queries/faktura";
+import { getFaktura, listFaktury } from "@/lib/queries/faktura";
+import { listProjektOptions } from "@/lib/queries/projekt";
+import { listSluzbaOptions } from "@/lib/queries/sluzba";
+import { listZakaznikOptions } from "@/lib/queries/zakaznik";
 
 function stavTone(stav: string) {
   if (stav === "uhrazena") return "green" as const;
@@ -18,13 +23,48 @@ function stavTone(stav: string) {
   return "gray" as const;
 }
 
-export default async function FakturyPage() {
+export default async function FakturyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ nova?: string; upravit?: string; zakaznik?: string }>;
+}) {
   if (!(await requireSession())) redirect("/login");
-  const rows = await listFaktury();
+  const params = await searchParams;
+  const [rows, zakaznici, projekty, sluzby, editRow] = await Promise.all([
+    listFaktury(),
+    listZakaznikOptions(),
+    listProjektOptions(),
+    listSluzbaOptions(),
+    params.upravit ? getFaktura(params.upravit) : Promise.resolve(null),
+  ]);
+  if (params.upravit && !editRow) notFound();
 
   return (
-    <AppShell title="Faktury" actions={<Button href="/faktury/nova">+ Nová faktura</Button>}>
+    <AppShell
+      title="Faktury"
+      actions={
+        <Suspense fallback={null}>
+          <NovaFakturaModalTrigger
+            zakaznici={zakaznici}
+            projekty={projekty}
+            sluzby={sluzby}
+            defaultOpen={params.nova === "1"}
+            defaultZakaznik={params.zakaznik ?? ""}
+          />
+        </Suspense>
+      }
+    >
       <FakturySubnav />
+      <Suspense fallback={null}>
+        <UpravitFakturaModal
+          editRow={editRow}
+          zakaznici={zakaznici}
+          projekty={projekty}
+          sluzby={sluzby}
+          returnPath="/faktury"
+        />
+      </Suspense>
+
       {rows.length === 0 ? (
         <EmptyState message="Zatím nemáte žádné faktury." />
       ) : (
@@ -44,11 +84,18 @@ export default async function FakturyPage() {
               {rows.map((row) => (
                 <tr key={row.id} className="border-b border-border last:border-0 hover:bg-gray-50/80">
                   <td className="px-4 py-3">
-                    <Link href={`/faktury/${row.id}`} className="text-primary hover:underline font-medium">
+                    <Link
+                      href={`/faktury?upravit=${row.id}`}
+                      className="text-primary hover:underline font-medium"
+                    >
                       {row.cislo_faktury ?? "—"}
                     </Link>
                   </td>
-                  <td className="px-4 py-3">{row.zakaznik_nazev}</td>
+                  <td className="px-4 py-3">
+                    <Link href={`/zakaznici/${row.zakaznik_id}`} className="text-primary hover:underline">
+                      {row.zakaznik_nazev}
+                    </Link>
+                  </td>
                   <td className="px-4 py-3">{formatDate(row.datum_vystaveni)}</td>
                   <td className="px-4 py-3">{formatDate(row.datum_splatnosti)}</td>
                   <td className="px-4 py-3">{formatMoney(row.castka_celkem)}</td>

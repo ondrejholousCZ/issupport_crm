@@ -117,14 +117,14 @@ export default async function ZakaznikDetailPage({
             )}
           </Section>
 
-          <Section title="Faktury" href={`/faktury/nova?zakaznik=${id}`}>
+          <Section title="Faktury" href={`/faktury?nova=1&zakaznik=${id}`}>
             {faktury.length === 0 ? (
               <EmptyState message="Žádné faktury." />
             ) : (
               <MiniTable
                 headers={["Číslo", "Vystaveno", "Stav"]}
                 rows={faktury.map((f) => [
-                  <Link key={f.id} href={`/faktury/${f.id}`} className="text-primary hover:underline">{f.cislo_faktury ?? "—"}</Link>,
+                  <Link key={f.id} href={`/faktury?upravit=${f.id}`} className="text-primary hover:underline">{f.cislo_faktury ?? "—"}</Link>,
                   formatDate(f.datum_vystaveni),
                   fakturaStavLabels[f.stav],
                 ])}

@@ -54,7 +54,8 @@ export default async function ProjektyPage({
                 <th className="text-left px-4 py-3 font-medium">Projekt</th>
                 <th className="text-left px-4 py-3 font-medium">Zakázka</th>
                 <th className="text-left px-4 py-3 font-medium">Zákazník</th>
-                <th className="text-left px-4 py-3 font-medium">Období</th>
+                <th className="text-left px-4 py-3 font-medium">Od</th>
+                <th className="text-left px-4 py-3 font-medium">Do</th>
                 <th className="text-left px-4 py-3 font-medium">Sazba</th>
                 <th className="text-left px-4 py-3 font-medium">Stav</th>
               </tr>
@@ -72,9 +73,8 @@ export default async function ProjektyPage({
                   </td>
                   <td className="px-4 py-3 text-gray-600">{row.zakazka ?? "—"}</td>
                   <td className="px-4 py-3">{row.zakaznik_nazev}</td>
-                  <td className="px-4 py-3">
-                    {formatDate(row.datum_od)} – {formatDate(row.datum_do)}
-                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">{formatDate(row.datum_od)}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{formatDate(row.datum_do)}</td>
                   <td className="px-4 py-3">
                     {formatProjektSazba(row.hodinova_sazba_fak, row.mena, row.jednotka_sazby ?? "hodina")}
                   </td>

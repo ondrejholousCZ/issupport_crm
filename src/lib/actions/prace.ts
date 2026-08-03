@@ -53,9 +53,9 @@ export async function createPraceAction(formData: FormData) {
   base.zakaznik_id = await resolveZakaznikId(base);
 
   if (datums.length === 1) {
-    const row = await createPrace({ ...base, datum: datums[0] });
+    await createPrace({ ...base, datum: datums[0] });
     revalidatePath("/prace");
-    redirect(`/prace/${row.id}`);
+    redirect("/prace");
   }
 
   for (const datum of datums) {

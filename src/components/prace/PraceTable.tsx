@@ -139,7 +139,7 @@ export function PraceTable({
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">{formatDate(row.datum)}</td>
                 <td className="px-4 py-3">
-                  <Link href={`/prace/${row.id}`} className="text-primary hover:underline font-medium block">
+                  <Link href={`/zakaznici/${row.zakaznik_id}`} className="text-primary hover:underline font-medium block">
                     {row.zakaznik_nazev}
                   </Link>
                   <span className="text-gray-500 text-xs line-clamp-1">{row.projekt_nazev}</span>

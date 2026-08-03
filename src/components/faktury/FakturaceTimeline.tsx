@@ -101,7 +101,7 @@ export function FakturaceTimelineView({ timeline }: { timeline: TimelineMonthDat
                 {month.faktury.map((f) => (
                   <TimelineCard
                     key={`f-${f.id}`}
-                    href={`/faktury/${f.id}`}
+                    href={`/faktury/timeline?upravit=${f.id}`}
                     tone={f.stav === "uhrazena" ? "gray" : "green"}
                     title={f.cislo ? `Faktura ${f.cislo}` : "Faktura"}
                     subtitle={`${f.zakaznikNazev} · ${fakturaStavLabels[f.stav as keyof typeof fakturaStavLabels] ?? f.stav}`}

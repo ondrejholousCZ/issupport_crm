@@ -28,17 +28,16 @@ function parse(formData: FormData) {
 
 export async function createPracovnikAction(formData: FormData) {
   await guard();
-  const data = parse(formData);
-  const row = await createPracovnik(data);
+  await createPracovnik(parse(formData));
   revalidatePath("/pracovnici");
-  redirect(`/pracovnici/${row.id}`);
+  redirect("/pracovnici");
 }
 
 export async function updatePracovnikAction(id: string, formData: FormData) {
   await guard();
   await updatePracovnik(id, parse(formData));
   revalidatePath("/pracovnici");
-  redirect(`/pracovnici/${id}`);
+  redirect("/pracovnici");
 }
 
 export async function deletePracovnikAction(id: string) {

@@ -30,21 +30,24 @@ function parse(formData: FormData) {
 
 export async function createFakturaAction(formData: FormData) {
   await guard();
-  const row = await createFaktura(parse(formData));
+  await createFaktura(parse(formData));
   revalidatePath("/faktury");
-  redirect(`/faktury/${row.id}`);
+  revalidatePath("/faktury/timeline");
+  redirect("/faktury");
 }
 
 export async function updateFakturaAction(id: string, formData: FormData) {
   await guard();
   await updateFaktura(id, parse(formData));
   revalidatePath("/faktury");
-  redirect(`/faktury/${id}`);
+  revalidatePath("/faktury/timeline");
+  redirect("/faktury");
 }
 
 export async function deleteFakturaAction(id: string) {
   await guard();
   await deleteFaktura(id);
   revalidatePath("/faktury");
+  revalidatePath("/faktury/timeline");
   redirect("/faktury");
 }

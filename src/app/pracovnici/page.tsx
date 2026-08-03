@@ -1,20 +1,42 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { AppShell } from "@/components/AppShell";
-import { Button } from "@/components/ui/Button";
+import { NovaPracovnikModalTrigger } from "@/components/pracovnici/NovaPracovnikModal";
+import { UpravitPracovnikModal } from "@/components/pracovnici/UpravitPracovnikModal";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { requireSession } from "@/lib/auth/require-session";
 import { formatDate, formatMoney } from "@/lib/format";
 import { pracovnikTypLabels } from "@/lib/labels";
-import { listPracovnici } from "@/lib/queries/pracovnik";
+import { getPracovnik, listPracovnici } from "@/lib/queries/pracovnik";
 
-export default async function PracovniciPage() {
+export default async function PracovniciPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ nova?: string; upravit?: string }>;
+}) {
   if (!(await requireSession())) redirect("/login");
-  const rows = await listPracovnici();
+  const params = await searchParams;
+  const [rows, editRow] = await Promise.all([
+    listPracovnici(),
+    params.upravit ? getPracovnik(params.upravit) : Promise.resolve(null),
+  ]);
+  if (params.upravit && !editRow) notFound();
 
   return (
-    <AppShell title="Pracovníci" actions={<Button href="/pracovnici/novy">+ Nový pracovník</Button>}>
+    <AppShell
+      title="Pracovníci"
+      actions={
+        <Suspense fallback={null}>
+          <NovaPracovnikModalTrigger defaultOpen={params.nova === "1"} />
+        </Suspense>
+      }
+    >
+      <Suspense fallback={null}>
+        <UpravitPracovnikModal editRow={editRow} returnPath="/pracovnici" />
+      </Suspense>
+
       {rows.length === 0 ? (
         <EmptyState message="Zatím nemáte žádné pracovníky." />
       ) : (
@@ -33,7 +55,10 @@ export default async function PracovniciPage() {
               {rows.map((row) => (
                 <tr key={row.id} className="border-b border-border last:border-0 hover:bg-gray-50/80">
                   <td className="px-4 py-3">
-                    <Link href={`/pracovnici/${row.id}`} className="text-primary hover:underline font-medium">
+                    <Link
+                      href={`/pracovnici?upravit=${row.id}`}
+                      className="text-primary hover:underline font-medium"
+                    >
                       {row.prijmeni} {row.jmeno}
                     </Link>
                   </td>
