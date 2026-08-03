@@ -6,5 +6,5 @@ export default async function UpravitSluzbuPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  redirect(`/sluzby/${id}?upravit=1`);
+  redirect(`/sluzby?upravit=${id}`);
 }

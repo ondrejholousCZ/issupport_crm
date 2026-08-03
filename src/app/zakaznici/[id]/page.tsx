@@ -109,7 +109,7 @@ export default async function ZakaznikDetailPage({
               <MiniTable
                 headers={["Název", "Další fakturace", "Stav"]}
                 rows={sluzby.map((s) => [
-                  <Link key={s.id} href={`/sluzby/${s.id}`} className="text-primary hover:underline">{s.nazev_sluzby}</Link>,
+                  <Link key={s.id} href={`/sluzby?upravit=${s.id}`} className="text-primary hover:underline">{s.nazev_sluzby}</Link>,
                   formatDate(s.dalsi_fakturace),
                   sluzbaStavLabels[s.stav],
                 ])}

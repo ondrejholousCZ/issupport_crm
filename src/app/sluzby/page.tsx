@@ -64,7 +64,7 @@ export default async function SluzbyPage({
               {rows.map((row) => (
                 <tr key={row.id} className="border-b border-border last:border-0 hover:bg-gray-50/80">
                   <td className="px-4 py-3">
-                    <Link href={`/sluzby/${row.id}`} className="text-primary hover:underline font-medium">
+                    <Link href={`/sluzby?upravit=${row.id}`} className="text-primary hover:underline font-medium">
                       {row.nazev_sluzby}
                     </Link>
                   </td>

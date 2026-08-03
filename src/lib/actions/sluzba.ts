@@ -33,16 +33,16 @@ function parse(formData: FormData) {
 
 export async function createSluzbaAction(formData: FormData) {
   await guard();
-  const row = await createSluzba(parse(formData));
+  await createSluzba(parse(formData));
   revalidatePath("/sluzby");
-  redirect(`/sluzby/${row.id}`);
+  redirect("/sluzby");
 }
 
 export async function updateSluzbaAction(id: string, formData: FormData) {
   await guard();
   await updateSluzba(id, parse(formData));
   revalidatePath("/sluzby");
-  redirect(`/sluzby/${id}`);
+  redirect("/sluzby");
 }
 
 export async function deleteSluzbaAction(id: string) {

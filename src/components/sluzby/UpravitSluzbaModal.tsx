@@ -3,7 +3,8 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { DraggableModal } from "@/components/ui/DraggableModal";
-import { updateSluzbaAction } from "@/lib/actions/sluzba";
+import { DeleteForm } from "@/components/DeleteForm";
+import { deleteSluzbaAction, updateSluzbaAction } from "@/lib/actions/sluzba";
 import type { Sluzba } from "@/lib/types";
 import { SluzbaForm } from "./SluzbaForm";
 
@@ -60,6 +61,9 @@ export function UpravitSluzbaModal({
           stav: editRow.stav,
         }}
       />
+      <div className="mt-4 border-t border-border pt-4">
+        <DeleteForm action={deleteSluzbaAction.bind(null, editRow.id)} />
+      </div>
     </DraggableModal>
   );
 }
