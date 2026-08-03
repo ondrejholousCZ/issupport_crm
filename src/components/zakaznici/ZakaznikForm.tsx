@@ -6,10 +6,10 @@ import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormField, FormGrid, FormSelect, FormTextarea } from "@/components/ui/FormField";
 import { zakaznikStavLabels } from "@/lib/labels";
 
-type ZakaznikFormValues = {
+export type ZakaznikFormValues = {
   nazev?: string;
   ico?: string;
-  ic_dph?: string;
+  zkratka?: string;
   stav?: string;
   kontaktni_email?: string;
   kontaktni_telefon?: string;
@@ -22,16 +22,18 @@ type ZakaznikFormValues = {
 export function ZakaznikForm({
   action,
   submitLabel = "Uložit",
-  cancelHref,
+  onCancel,
   defaultValues = {},
 }: {
   action: (formData: FormData) => Promise<void>;
   submitLabel?: string;
-  cancelHref: string;
+  onCancel: () => void;
   defaultValues?: ZakaznikFormValues;
 }) {
+  const isEdit = Boolean(defaultValues.nazev);
   const [ico, setIco] = useState(defaultValues.ico ?? "");
   const [nazev, setNazev] = useState(defaultValues.nazev ?? "");
+  const [zkratka, setZkratka] = useState(defaultValues.zkratka ?? "");
   const [fakturacniUlice, setFakturacniUlice] = useState(defaultValues.fakturacni_ulice ?? "");
   const [fakturacniMesto, setFakturacniMesto] = useState(defaultValues.fakturacni_mesto ?? "");
   const [fakturacniPsc, setFakturacniPsc] = useState(defaultValues.fakturacni_psc ?? "");
@@ -41,7 +43,7 @@ export function ZakaznikForm({
 
   function resetLoadedFields() {
     setLookupDone(false);
-    if (!defaultValues.nazev) setNazev("");
+    if (!isEdit) setNazev("");
     setFakturacniUlice(defaultValues.fakturacni_ulice ?? "");
     setFakturacniMesto(defaultValues.fakturacni_mesto ?? "");
     setFakturacniPsc(defaultValues.fakturacni_psc ?? "");
@@ -114,7 +116,7 @@ export function ZakaznikForm({
             loading={lookupLoading}
             variant="secondary"
           >
-            Načti z DAIS
+            {isEdit ? "Aktualizovat z DAIS" : "Načti z DAIS"}
           </Button>
         </div>
         <p className="text-xs text-gray-500 mt-1">Vyplní název a fakturační adresu z ARES.</p>
@@ -123,9 +125,11 @@ export function ZakaznikForm({
       <FormGrid>
         <FormField label="Název" name="nazev" required value={nazev} onChange={(e) => setNazev(e.target.value)} />
         <FormField
-          label="IČ DPH"
-          name="ic_dph"
-          defaultValue={defaultValues.ic_dph ?? ""}
+          label="Zkratka zákazníka"
+          name="zkratka"
+          value={zkratka}
+          onChange={(e) => setZkratka(e.target.value)}
+          placeholder="např. CoHe"
         />
         <FormSelect
           label="Stav"
@@ -172,7 +176,7 @@ export function ZakaznikForm({
 
       {lookupDone ? (
         <p className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-          Údaje načteny z DAIS — před uložením je můžete ještě upravit.
+          Údaje {isEdit ? "aktualizovány" : "načteny"} z DAIS — před uložením je můžete ještě upravit.
         </p>
       ) : null}
 
@@ -182,7 +186,7 @@ export function ZakaznikForm({
 
       <div className="flex gap-2 pt-2">
         <SubmitButton>{submitLabel}</SubmitButton>
-        <Button href={cancelHref} variant="secondary">
+        <Button type="button" variant="secondary" onClick={onCancel}>
           Zrušit
         </Button>
       </div>

@@ -39,6 +39,7 @@ export async function listPrace(filters?: {
   const result = await query<OdvedenaPrace>(
     `SELECT op.*,
             z.nazev AS zakaznik_nazev,
+            z.zkratka AS zakaznik_zkratka,
             p.nazev_projektu AS projekt_nazev,
             p.zakazka AS projekt_zakazka,
             p.hodinova_sazba_fak AS projekt_sazba_fak,
@@ -60,6 +61,7 @@ export async function getPrace(id: string): Promise<OdvedenaPrace | null> {
   const result = await query<OdvedenaPrace>(
     `SELECT op.*,
             z.nazev AS zakaznik_nazev,
+            z.zkratka AS zakaznik_zkratka,
             p.nazev_projektu AS projekt_nazev,
             p.zakazka AS projekt_zakazka,
             p.hodinova_sazba_fak AS projekt_sazba_fak,

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { AppShell } from "@/components/AppShell";
+import { UpravitZakaznikModal } from "@/components/zakaznici/UpravitZakaznikModal";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { DeleteForm } from "@/components/DeleteForm";
@@ -23,13 +25,18 @@ import { getZakaznik } from "@/lib/queries/zakaznik";
 
 export default async function ZakaznikDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ upravit?: string }>;
 }) {
   if (!(await requireSession())) redirect("/login");
   const { id } = await params;
+  const { upravit } = await searchParams;
   const zakaznik = await getZakaznik(id);
   if (!zakaznik) notFound();
+
+  const showEdit = upravit === "1" || upravit === id;
 
   const [projekty, sluzby, faktury, prace] = await Promise.all([
     listProjekty(id),
@@ -43,19 +50,23 @@ export default async function ZakaznikDetailPage({
       title={zakaznik.nazev}
       actions={
         <>
-          <Button href={`/zakaznici/${id}/upravit`} variant="secondary">
+          <Button href={`/zakaznici/${id}?upravit=1`} variant="secondary">
             Upravit
           </Button>
           <DeleteForm action={deleteZakaznikAction.bind(null, id)} />
         </>
       }
     >
+      <Suspense fallback={null}>
+        <UpravitZakaznikModal editRow={showEdit ? zakaznik : null} returnPath={`/zakaznici/${id}`} />
+      </Suspense>
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <Card className="xl:col-span-1">
           <CardHeader title="Údaje" />
           <CardBody className="space-y-2 text-sm">
             <p><span className="text-gray-500">IČO:</span> {zakaznik.ico ?? "—"}</p>
-            <p><span className="text-gray-500">IČ DPH:</span> {zakaznik.ic_dph ?? "—"}</p>
+            <p><span className="text-gray-500">Zkratka:</span> {zakaznik.zkratka ?? "—"}</p>
             <p><span className="text-gray-500">E-mail:</span> {zakaznik.kontaktni_email ?? "—"}</p>
             <p><span className="text-gray-500">Telefon:</span> {zakaznik.kontaktni_telefon ?? "—"}</p>
             <p>

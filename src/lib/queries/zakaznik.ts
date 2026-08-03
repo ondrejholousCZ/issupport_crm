@@ -16,7 +16,7 @@ export async function getZakaznik(id: string): Promise<Zakaznik | null> {
 export async function createZakaznik(data: {
   ico?: string;
   nazev: string;
-  ic_dph?: string;
+  zkratka?: string;
   kontaktni_email?: string;
   kontaktni_telefon?: string;
   fakturacni_ulice?: string;
@@ -27,14 +27,14 @@ export async function createZakaznik(data: {
 }) {
   const result = await query<Zakaznik>(
     `INSERT INTO zakaznik (
-      ico, nazev, ic_dph, kontaktni_email, kontaktni_telefon,
+      ico, nazev, zkratka, kontaktni_email, kontaktni_telefon,
       fakturacni_ulice, fakturacni_mesto, fakturacni_psc, postup_fakturace, stav
     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     RETURNING *`,
     [
       data.ico || null,
       data.nazev,
-      data.ic_dph || null,
+      data.zkratka || null,
       data.kontaktni_email || null,
       data.kontaktni_telefon || null,
       data.fakturacni_ulice || null,
@@ -52,7 +52,7 @@ export async function updateZakaznik(
   data: {
     ico?: string;
     nazev: string;
-    ic_dph?: string;
+    zkratka?: string;
     kontaktni_email?: string;
     kontaktni_telefon?: string;
     fakturacni_ulice?: string;
@@ -64,7 +64,7 @@ export async function updateZakaznik(
 ) {
   const result = await query<Zakaznik>(
     `UPDATE zakaznik SET
-      ico = $2, nazev = $3, ic_dph = $4, kontaktni_email = $5, kontaktni_telefon = $6,
+      ico = $2, nazev = $3, zkratka = $4, kontaktni_email = $5, kontaktni_telefon = $6,
       fakturacni_ulice = $7, fakturacni_mesto = $8, fakturacni_psc = $9,
       postup_fakturace = $10, stav = $11
     WHERE id = $1
@@ -73,7 +73,7 @@ export async function updateZakaznik(
       id,
       data.ico || null,
       data.nazev,
-      data.ic_dph || null,
+      data.zkratka || null,
       data.kontaktni_email || null,
       data.kontaktni_telefon || null,
       data.fakturacni_ulice || null,

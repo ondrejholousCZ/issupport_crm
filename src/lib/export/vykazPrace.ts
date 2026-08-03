@@ -20,8 +20,8 @@ const FMT_CENA = '#,##0.00" Kč"';
 export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string): string {
   const yyyymm = mesic.replace("-", "");
   const pracovnici = new Set(rows.map((r) => r.pracovnik_id));
-  const zakazky = new Set(
-    rows.map((r) => r.projekt_zakazka).filter((z): z is string => Boolean(z?.trim())),
+  const zakaznikZkratky = new Set(
+    rows.map((r) => r.zakaznik_zkratka).filter((z): z is string => Boolean(z?.trim())),
   );
 
   let prefix = "Vykaz";
@@ -33,9 +33,13 @@ export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string): string
   }
 
   const suffix =
-    zakazky.size === 1 ? [...zakazky][0] : zakazky.size > 1 ? "mix" : "export";
+    zakaznikZkratky.size === 1
+      ? [...zakaznikZkratky][0]
+      : zakaznikZkratky.size > 1
+        ? "mix"
+        : "export";
 
-  return `${prefix}_Vykaz_prace_${yyyymm}_${suffix}.xlsx`;
+  return `${prefix}_Výkaz_Práce_${yyyymm}_${suffix}.xlsx`;
 }
 
 export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS.Buffer> {

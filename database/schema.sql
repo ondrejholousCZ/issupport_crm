@@ -26,7 +26,7 @@ CREATE TABLE crmissp.zakaznik (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   ico                   VARCHAR(20) UNIQUE,
   nazev                 VARCHAR(300) NOT NULL,
-  ic_dph                VARCHAR(30),
+  zkratka               VARCHAR(30),
   kontaktni_email       VARCHAR(200),
   kontaktni_telefon     VARCHAR(50),
   fakturacni_ulice      VARCHAR(200),

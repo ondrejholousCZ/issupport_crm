@@ -14,7 +14,7 @@ export interface Zakaznik {
   id: string;
   ico: string | null;
   nazev: string;
-  ic_dph: string | null;
+  zkratka: string | null;
   kontaktni_email: string | null;
   kontaktni_telefon: string | null;
   fakturacni_ulice: string | null;
@@ -109,6 +109,7 @@ export interface OdvedenaPrace {
   created_at: string;
   updated_at: string;
   zakaznik_nazev?: string;
+  zakaznik_zkratka?: string | null;
   projekt_nazev?: string;
   projekt_zakazka?: string | null;
   projekt_sazba_fak?: string | null;

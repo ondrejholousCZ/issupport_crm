@@ -18,7 +18,7 @@ function parse(formData: FormData) {
   return {
     ico: formOptStr(formData, "ico"),
     nazev: formStr(formData, "nazev"),
-    ic_dph: formOptStr(formData, "ic_dph"),
+    zkratka: formOptStr(formData, "zkratka"),
     kontaktni_email: formOptStr(formData, "kontaktni_email"),
     kontaktni_telefon: formOptStr(formData, "kontaktni_telefon"),
     fakturacni_ulice: formOptStr(formData, "fakturacni_ulice"),
