@@ -8,12 +8,14 @@ export function DraggableModal({
   title,
   children,
   widthClass = "w-full max-w-2xl",
+  closeOnBackdropClick = true,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
   widthClass?: string;
+  closeOnBackdropClick?: boolean;
 }) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
@@ -75,12 +77,16 @@ export function DraggableModal({
 
   return (
     <div className="fixed inset-0 z-50">
-      <button
-        type="button"
-        aria-label="Zavřít"
-        className="absolute inset-0 bg-black/20"
-        onClick={onClose}
-      />
+      {closeOnBackdropClick ? (
+        <button
+          type="button"
+          aria-label="Zavřít"
+          className="absolute inset-0 bg-black/20"
+          onClick={onClose}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-black/20" aria-hidden />
+      )}
       <div
         ref={modalRef}
         className={`absolute ${widthClass} rounded-xl border border-border bg-white shadow-2xl flex flex-col max-h-[calc(100vh-2rem)]`}

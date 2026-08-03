@@ -44,7 +44,12 @@ export function NovaPraceModalTrigger({
       <Button type="button" onClick={launch}>
         + Nová práce
       </Button>
-      <DraggableModal open={open} onClose={close} title="Nová odvedená práce">
+      <DraggableModal
+        open={open}
+        onClose={close}
+        title="Nová odvedená práce"
+        closeOnBackdropClick={false}
+      >
         <NovaPraceForm
           projekty={projekty}
           pracovnici={pracovnici}

@@ -64,10 +64,11 @@ export function MultiDatePicker({ defaultValue }: { defaultValue?: string }) {
             const next = e.target.checked;
             setMultiMode(next);
             if (next) {
-              setSelectedDates(new Set([singleDate]));
+              setSelectedDates(new Set());
               setViewMonth(viewMonthFromIso(singleDate));
             } else if (sortedSelected.length > 0) {
               setSingleDate(sortedSelected[0]);
+              setSelectedDates(new Set([sortedSelected[0]]));
             }
           }}
           className="rounded border-border"
@@ -96,6 +97,25 @@ export function MultiDatePicker({ defaultValue }: { defaultValue?: string }) {
               }
             />
           </div>
+          {sortedSelected.length > 0 ? (
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {sortedSelected.map((iso) => (
+                <li key={iso}>
+                  <button
+                    type="button"
+                    onClick={() => toggleDate(iso)}
+                    className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700 hover:bg-gray-200"
+                    title="Odebrat den"
+                  >
+                    {formatDate(iso)}
+                    <span aria-hidden className="text-gray-500">
+                      ×
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </>
       ) : (
         <>

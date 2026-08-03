@@ -1,12 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Popover } from "@/components/ui/Popover";
 
 const triggerClass =
   "h-[38px] w-full rounded-lg border border-border bg-white px-3 text-sm text-left focus:outline-none focus:ring-2 focus:ring-primary/30 hover:bg-gray-50/80 truncate";
 
 type Option = { id: string; label: string };
+
+function sameSelection(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false;
+  const setB = new Set(b);
+  return a.every((id) => setB.has(id));
+}
 
 export function MultiSelect({
   options,
@@ -20,6 +26,11 @@ export function MultiSelect({
   emptyLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<string[]>(value);
+
+  useEffect(() => {
+    if (!open) setDraft(value);
+  }, [value, open]);
 
   const label = useMemo(() => {
     if (value.length === 0) return emptyLabel;
@@ -29,18 +40,32 @@ export function MultiSelect({
     return `${value.length} vybráno`;
   }, [value, options, emptyLabel]);
 
+  function closeAndApply() {
+    setOpen(false);
+    if (!sameSelection(draft, value)) {
+      onChange(draft);
+    }
+  }
+
+  function openPopover() {
+    setDraft(value);
+    setOpen(true);
+  }
+
   function toggle(id: string) {
-    onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
+    setDraft((current) =>
+      current.includes(id) ? current.filter((v) => v !== id) : [...current, id],
+    );
   }
 
   return (
     <Popover
       open={open}
-      onClose={() => setOpen(false)}
+      onClose={closeAndApply}
       trigger={
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => (open ? closeAndApply() : openPopover())}
           className={triggerClass}
           aria-expanded={open}
           aria-haspopup="listbox"
@@ -50,10 +75,10 @@ export function MultiSelect({
       }
     >
       <div className="min-w-[220px] max-h-[280px] overflow-y-auto p-1">
-        {value.length > 0 ? (
+        {draft.length > 0 ? (
           <button
             type="button"
-            onClick={() => onChange([])}
+            onClick={() => setDraft([])}
             className="mb-1 w-full rounded-lg px-2 py-1.5 text-left text-xs text-gray-600 hover:bg-gray-100"
           >
             Vymazat výběr
@@ -66,7 +91,7 @@ export function MultiSelect({
           >
             <input
               type="checkbox"
-              checked={value.includes(opt.id)}
+              checked={draft.includes(opt.id)}
               onChange={() => toggle(opt.id)}
               className="rounded border-border"
             />
