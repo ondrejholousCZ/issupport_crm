@@ -14,6 +14,9 @@ function parseDatum(value: string | Date): Date {
   return new Date(y, m - 1, d, 12, 0, 0);
 }
 
+const FMT_HODINY = "[h]:mm";
+const FMT_CENA = '#,##0.00" Kč"';
+
 export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string): string {
   const yyyymm = mesic.replace("-", "");
   const pracovnici = new Set(rows.map((r) => r.pracovnik_id));
@@ -52,9 +55,12 @@ export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS
     { header: "Pracovník", key: "pracovnik", width: 22 },
     { header: "Počet hodin", key: "hodiny", width: 14 },
     { header: "Činnost", key: "cinnost", width: 14 },
-    { header: "Popis", key: "popis", width: 48 },
-    { header: "Fakturační cena", key: "cena", width: 16 },
+    { header: "Popis", key: "popis", width: 72 },
+    { header: "Fakturační cena", key: "cena", width: 18 },
   ];
+
+  ws.getColumn("hodiny").numFmt = FMT_HODINY;
+  ws.getColumn("cena").numFmt = FMT_CENA;
 
   const header = ws.getRow(1);
   header.font = { bold: true };
@@ -85,8 +91,6 @@ export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS
     });
 
     dataRow.getCell("datum").numFmt = "d.m.yyyy";
-    dataRow.getCell("hodiny").numFmt = "0.000000000000000";
-    dataRow.getCell("cena").numFmt = "0";
   }
 
   const emptyRows = 2;
@@ -102,8 +106,6 @@ export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS
     popis: "",
     cena: sumCena,
   });
-  sumRow.getCell("hodiny").numFmt = "0.000000000000000";
-  sumRow.getCell("cena").numFmt = "0";
 
   return wb.xlsx.writeBuffer();
 }
