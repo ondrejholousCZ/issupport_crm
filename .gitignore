@@ -1,0 +1,24 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# env & secrets
+.env
+.env.local
+.env*.local
+CREDENTIALS.md
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+
+# typescript
+next-env.d.ts
+
+# archives (local only)
+files.zip
+issp-crm-cursor-project.zip

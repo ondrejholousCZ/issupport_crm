@@ -1,0 +1,56 @@
+import { notFound, redirect } from "next/navigation";
+import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/Button";
+import { Card, CardBody } from "@/components/ui/Card";
+import { FormField, FormGrid, FormSelect, FormTextarea } from "@/components/ui/FormField";
+import { updateZakaznikAction } from "@/lib/actions/zakaznik";
+import { requireSession } from "@/lib/auth/require-session";
+import { zakaznikStavLabels } from "@/lib/labels";
+import { getZakaznik } from "@/lib/queries/zakaznik";
+
+export default async function UpravitZakaznikPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  if (!(await requireSession())) redirect("/login");
+  const { id } = await params;
+  const row = await getZakaznik(id);
+  if (!row) notFound();
+
+  const update = updateZakaznikAction.bind(null, id);
+
+  return (
+    <AppShell title={`Upravit: ${row.nazev}`}>
+      <Card className="max-w-3xl">
+        <CardBody>
+          <form action={update} className="space-y-4">
+            <FormGrid>
+              <FormField label="Název" name="nazev" required defaultValue={row.nazev} />
+              <FormField label="IČO" name="ico" defaultValue={row.ico ?? ""} />
+              <FormField label="IČ DPH" name="ic_dph" defaultValue={row.ic_dph ?? ""} />
+              <FormSelect
+                label="Stav"
+                name="stav"
+                defaultValue={row.stav}
+                options={Object.entries(zakaznikStavLabels).map(([value, label]) => ({ value, label }))}
+              />
+              <FormField label="Kontaktní e-mail" name="kontaktni_email" type="email" defaultValue={row.kontaktni_email ?? ""} />
+              <FormField label="Telefon" name="kontaktni_telefon" defaultValue={row.kontaktni_telefon ?? ""} />
+              <FormField label="Ulice" name="fakturacni_ulice" defaultValue={row.fakturacni_ulice ?? ""} />
+              <FormField label="Město" name="fakturacni_mesto" defaultValue={row.fakturacni_mesto ?? ""} />
+              <FormField label="PSČ" name="fakturacni_psc" defaultValue={row.fakturacni_psc ?? ""} />
+            </FormGrid>
+            <FormTextarea label="Postup fakturace" name="postup_fakturace" defaultValue={row.postup_fakturace ?? ""} />
+            <div className="flex gap-2 pt-2">
+              <Button type="submit">Uložit</Button>
+              <Button href={`/zakaznici/${id}`} variant="secondary">
+                Zrušit
+              </Button>
+            </div>
+          </form>
+        </CardBody>
+      </Card>
+    </AppShell>
+  );
+}
