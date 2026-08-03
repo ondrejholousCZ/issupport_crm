@@ -121,7 +121,7 @@ export function PraceFilters({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-end gap-x-3 gap-y-3">
-        <FilterField label="Měsíc" className="w-[180px]">
+        <FilterField label="Období" className="w-[200px]">
           <MesicPicker value={filters.mesic} onChange={(mesic) => applyFilters({ mesic })} />
         </FilterField>
 

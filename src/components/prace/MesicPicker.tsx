@@ -17,6 +17,7 @@ export function MesicPicker({
 }) {
   const [open, setOpen] = useState(false);
   const { rok, mesic: mesicCislo } = splitMesic(value);
+  const wholeYear = mesicCislo === null;
   const [viewYear, setViewYear] = useState(rok);
 
   useEffect(() => {
@@ -29,6 +30,11 @@ export function MesicPicker({
 
   const pickMonth = (month: number) => {
     onChange(buildMesic(viewYear, month));
+    setOpen(false);
+  };
+
+  const pickYear = () => {
+    onChange(String(viewYear));
     setOpen(false);
   };
 
@@ -49,7 +55,7 @@ export function MesicPicker({
       }
     >
       <div className="w-[280px] p-1">
-        <div className="flex items-center justify-between mb-3 px-1">
+        <div className="flex items-center justify-between mb-2 px-1">
           <button
             type="button"
             onClick={() => setViewYear((y) => y - 1)}
@@ -68,10 +74,23 @@ export function MesicPicker({
             ›
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={pickYear}
+          className={`mb-2 w-full rounded-lg px-2 py-2 text-sm transition-colors ${
+            wholeYear && viewYear === rok
+              ? "bg-primary text-white font-medium"
+              : "hover:bg-gray-100 text-foreground"
+          }`}
+        >
+          Celý rok {viewYear}
+        </button>
+
         <div className="grid grid-cols-3 gap-1">
           {MONTH_LABELS.map((label, idx) => {
             const monthNum = idx + 1;
-            const selected = viewYear === rok && monthNum === mesicCislo;
+            const selected = !wholeYear && viewYear === rok && monthNum === mesicCislo;
             return (
               <button
                 key={label}

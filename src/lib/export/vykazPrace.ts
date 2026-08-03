@@ -18,7 +18,7 @@ const FMT_HODINY = "[h]:mm";
 const FMT_CENA = '#,##0.00" Kč"';
 
 export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string): string {
-  const yyyymm = mesic.replace("-", "");
+  const periodPart = /^\d{4}$/.test(mesic) ? mesic : mesic.replace("-", "");
   const pracovnici = new Set(rows.map((r) => r.pracovnik_id));
   const zakaznikZkratky = new Set(
     rows.map((r) => r.zakaznik_zkratka).filter((z): z is string => Boolean(z?.trim())),
@@ -39,7 +39,7 @@ export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string): string
         ? "mix"
         : "export";
 
-  return `${prefix}_Výkaz_Práce_${yyyymm}_${suffix}.xlsx`;
+  return `${prefix}_Výkaz_Práce_${periodPart}_${suffix}.xlsx`;
 }
 
 export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS.Buffer> {

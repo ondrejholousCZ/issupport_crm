@@ -20,10 +20,17 @@ export async function listPrace(filters?: {
     clauses.push(`op.projekt_id = ANY($${params.length}::uuid[])`);
   }
   if (filters?.mesic) {
-    params.push(`${filters.mesic}-01`);
-    const mesicIdx = params.length;
-    clauses.push(`op.datum >= $${mesicIdx}::date`);
-    clauses.push(`op.datum < ($${mesicIdx}::date + interval '1 month')`);
+    if (/^\d{4}$/.test(filters.mesic)) {
+      params.push(`${filters.mesic}-01-01`);
+      const rokIdx = params.length;
+      clauses.push(`op.datum >= $${rokIdx}::date`);
+      clauses.push(`op.datum < ($${rokIdx}::date + interval '1 year')`);
+    } else {
+      params.push(`${filters.mesic}-01`);
+      const mesicIdx = params.length;
+      clauses.push(`op.datum >= $${mesicIdx}::date`);
+      clauses.push(`op.datum < ($${mesicIdx}::date + interval '1 month')`);
+    }
   }
   if (filters?.pracovnikIds?.length) {
     params.push(filters.pracovnikIds);

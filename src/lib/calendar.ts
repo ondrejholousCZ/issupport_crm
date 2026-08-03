@@ -35,6 +35,7 @@ export function viewMonthFromIso(iso: string): ViewMonth {
 }
 
 export function formatMesicLabel(mesic: string): string {
+  if (/^\d{4}$/.test(mesic)) return `Celý rok ${mesic}`;
   const [rokStr, mesicStr] = mesic.split("-");
   const idx = Number(mesicStr) - 1;
   if (idx >= 0 && idx < 12) return `${MONTH_LABELS[idx]} ${rokStr}`;

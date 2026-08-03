@@ -18,12 +18,27 @@ export const MESICE_LABELS = [
   "Prosinec",
 ] as const;
 
-export function splitMesic(mesic: string): { rok: number; mesic: number } {
+export function splitMesic(mesic: string): { rok: number; mesic: number | null } {
+  if (/^\d{4}$/.test(mesic)) {
+    return { rok: Number(mesic), mesic: null };
+  }
   const [rokStr, mesicStr] = mesic.split("-");
   return {
     rok: Number(rokStr) || new Date().getFullYear(),
     mesic: Number(mesicStr) || new Date().getMonth() + 1,
   };
+}
+
+export function isCelyRok(obdobi: string): boolean {
+  return /^\d{4}$/.test(obdobi);
+}
+
+export function isMesicObdobi(obdobi: string): boolean {
+  return /^\d{4}-\d{2}$/.test(obdobi);
+}
+
+export function isValidObdobi(obdobi: string): boolean {
+  return isCelyRok(obdobi) || isMesicObdobi(obdobi);
 }
 
 export function buildMesic(rok: number, mesic: number): string {
@@ -59,7 +74,8 @@ function joinCsv(values: string[]): string | undefined {
 
 export function parsePraceFilters(params: Record<string, string | undefined>): PraceFilters {
   return {
-    mesic: params.mesic && /^\d{4}-\d{2}$/.test(params.mesic) ? params.mesic : currentMesic(),
+    mesic:
+      params.mesic && isValidObdobi(params.mesic) ? params.mesic : currentMesic(),
     pracovnikIds: parseCsv(params.pracovnik),
     projektIds: parseCsv(params.projekt),
     zakaznikIds: parseCsv(params.zakaznik),

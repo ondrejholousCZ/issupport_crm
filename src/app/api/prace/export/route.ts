@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
 
   const sp = request.nextUrl.searchParams;
   const mesic = sp.get("mesic");
-  if (mesic && !/^\d{4}-\d{2}$/.test(mesic)) {
-    return NextResponse.json({ error: "Neplatný parametr mesic (YYYY-MM)" }, { status: 400 });
+  if (mesic && !/^\d{4}(-\d{2})?$/.test(mesic)) {
+    return NextResponse.json({ error: "Neplatný parametr mesic (YYYY nebo YYYY-MM)" }, { status: 400 });
   }
 
   const filters = parsePraceFilters({
