@@ -6,6 +6,7 @@ import { MesicPicker } from "@/components/prace/MesicPicker";
 import { Button } from "@/components/ui/Button";
 import { MultiSelect } from "@/components/ui/MultiSelect";
 import { stavFakturaceLabels } from "@/lib/labels";
+import { parseContentDispositionFilename } from "@/lib/content-disposition";
 import { praceFiltersToQuery, praceFiltersToSearchParams, type PraceFilters } from "@/lib/prace-filters";
 
 type Option = { id: string; label: string; zakaznik_id?: string };
@@ -100,8 +101,9 @@ export function PraceFilters({
 
       const blob = await res.blob();
       const disposition = res.headers.get("Content-Disposition") ?? "";
-      const match = disposition.match(/filename="([^"]+)"/);
-      const filename = match?.[1] ?? `Vykaz_prace_${filters.mesic.replace("-", "")}.xlsx`;
+      const filename =
+        parseContentDispositionFilename(disposition) ??
+        `Vykaz_prace_${filters.mesic.replace("-", "")}.xlsx`;
 
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

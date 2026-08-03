@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { buildVykazFilename, buildVykazWorkbook } from "@/lib/export/vykazPrace";
+import { contentDispositionAttachment } from "@/lib/content-disposition";
 import { currentMesic, parsePraceFilters } from "@/lib/prace-filters";
 import { listPrace } from "@/lib/queries/prace";
 
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(buffer, {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": contentDispositionAttachment(filename),
     },
   });
 }
