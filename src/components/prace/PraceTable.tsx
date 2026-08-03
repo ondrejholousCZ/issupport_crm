@@ -6,9 +6,20 @@ import { deletePraceBulkAction } from "@/lib/actions/prace";
 import type { OdvedenaPrace } from "@/lib/types";
 import { formatCas, formatDate, formatMoney } from "@/lib/format";
 import { stavFakturaceLabels } from "@/lib/labels";
+import { exportCastka } from "@/lib/work-hours";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+
+function displayCastka(row: OdvedenaPrace): string {
+  const amount = exportCastka(
+    row.hodiny,
+    row.minuty,
+    row.projekt_sazba_fak,
+    row.castka_fakturace,
+  );
+  return formatMoney(amount);
+}
 
 export function PraceTable({ rows }: { rows: OdvedenaPrace[] }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -69,11 +80,14 @@ export function PraceTable({ rows }: { rows: OdvedenaPrace[] }) {
                 />
               </th>
               <th className="text-left px-4 py-3 font-medium">Datum</th>
-              <th className="text-left px-4 py-3 font-medium">Zákazník / Projekt</th>
+              <th className="text-left px-4 py-3 font-medium">Zákazník</th>
+              <th className="text-left px-4 py-3 font-medium">Projekt</th>
               <th className="text-left px-4 py-3 font-medium">Pracovník</th>
+              <th className="text-left px-4 py-3 font-medium min-w-[180px]">Popis</th>
               <th className="text-left px-4 py-3 font-medium">Čas</th>
               <th className="text-left px-4 py-3 font-medium">Fakturace</th>
               <th className="text-left px-4 py-3 font-medium">Stav</th>
+              <th className="w-20 px-3 py-3" />
             </tr>
           </thead>
           <tbody>
@@ -91,21 +105,37 @@ export function PraceTable({ rows }: { rows: OdvedenaPrace[] }) {
                     className="rounded border-border"
                   />
                 </td>
-                <td className="px-4 py-3">{formatDate(row.datum)}</td>
+                <td className="px-4 py-3 whitespace-nowrap">{formatDate(row.datum)}</td>
                 <td className="px-4 py-3">
                   <Link href={`/prace/${row.id}`} className="text-primary hover:underline font-medium block">
                     {row.zakaznik_nazev}
                   </Link>
-                  <span className="text-gray-500 text-xs">{row.projekt_nazev}</span>
+                  <span className="text-gray-500 text-xs line-clamp-1">{row.projekt_nazev}</span>
                 </td>
-                <td className="px-4 py-3">{row.pracovnik_jmeno}</td>
-                <td className="px-4 py-3">{formatCas(row.hodiny, row.minuty)}</td>
-                <td className="px-4 py-3">{formatMoney(row.castka_fakturace)}</td>
+                <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                  {row.projekt_zakazka ?? "—"}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">{row.pracovnik_jmeno}</td>
+                <td className="px-4 py-3 text-gray-600 max-w-xs">
+                  <span className="line-clamp-2" title={row.popis ?? undefined}>
+                    {row.popis ?? "—"}
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">{formatCas(row.hodiny, row.minuty)}</td>
+                <td className="px-4 py-3 whitespace-nowrap">{displayCastka(row)}</td>
                 <td className="px-4 py-3">
                   <StatusBadge
                     label={stavFakturaceLabels[row.stav_fakturace]}
                     tone={row.stav_fakturace === "nefakturovano" ? "yellow" : "green"}
                   />
+                </td>
+                <td className="px-3 py-3">
+                  <Link
+                    href={`/prace?upravit=${row.id}`}
+                    className="text-primary hover:underline text-xs font-medium"
+                  >
+                    Upravit
+                  </Link>
                 </td>
               </tr>
             ))}

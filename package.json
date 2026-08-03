@@ -13,6 +13,7 @@
     "db:migrate": "node scripts/migrate.js"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "next": "^15.5.0",
     "next-auth": "^5.0.0-beta.29",
     "pg": "^8.16.3",

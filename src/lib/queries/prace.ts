@@ -4,6 +4,8 @@ import type { OdvedenaPrace } from "@/lib/types";
 export async function listPrace(filters?: {
   zakaznikId?: string;
   projektId?: string;
+  mesic?: string;
+  pracovnikId?: string;
 }): Promise<OdvedenaPrace[]> {
   const clauses: string[] = [];
   const params: string[] = [];
@@ -16,6 +18,16 @@ export async function listPrace(filters?: {
     params.push(filters.projektId);
     clauses.push(`op.projekt_id = $${params.length}`);
   }
+  if (filters?.mesic) {
+    params.push(`${filters.mesic}-01`);
+    const mesicIdx = params.length;
+    clauses.push(`op.datum >= $${mesicIdx}::date`);
+    clauses.push(`op.datum < ($${mesicIdx}::date + interval '1 month')`);
+  }
+  if (filters?.pracovnikId) {
+    params.push(filters.pracovnikId);
+    clauses.push(`op.pracovnik_id = $${params.length}`);
+  }
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
 
@@ -24,6 +36,9 @@ export async function listPrace(filters?: {
             z.nazev AS zakaznik_nazev,
             p.nazev_projektu AS projekt_nazev,
             p.zakazka AS projekt_zakazka,
+            p.hodinova_sazba_fak AS projekt_sazba_fak,
+            pr.jmeno AS pracovnik_jmeno_krestni,
+            pr.prijmeni AS pracovnik_prijmeni,
             CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno
      FROM odvedena_prace op
      JOIN zakaznik z ON z.id = op.zakaznik_id
@@ -42,6 +57,9 @@ export async function getPrace(id: string): Promise<OdvedenaPrace | null> {
             z.nazev AS zakaznik_nazev,
             p.nazev_projektu AS projekt_nazev,
             p.zakazka AS projekt_zakazka,
+            p.hodinova_sazba_fak AS projekt_sazba_fak,
+            pr.jmeno AS pracovnik_jmeno_krestni,
+            pr.prijmeni AS pracovnik_prijmeni,
             CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno
      FROM odvedena_prace op
      JOIN zakaznik z ON z.id = op.zakaznik_id

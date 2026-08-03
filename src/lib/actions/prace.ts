@@ -77,7 +77,7 @@ export async function updatePraceAction(id: string, formData: FormData) {
   };
   await updatePrace(id, parsed);
   revalidatePath("/prace");
-  redirect(`/prace/${id}`);
+  redirect("/prace");
 }
 
 export async function deletePraceAction(id: string) {

@@ -111,7 +111,10 @@ export interface OdvedenaPrace {
   zakaznik_nazev?: string;
   projekt_nazev?: string;
   projekt_zakazka?: string | null;
+  projekt_sazba_fak?: string | null;
   pracovnik_jmeno?: string;
+  pracovnik_jmeno_krestni?: string;
+  pracovnik_prijmeni?: string;
 }
 
 export interface DashboardStats {

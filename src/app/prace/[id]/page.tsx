@@ -7,6 +7,7 @@ import { DeleteForm } from "@/components/DeleteForm";
 import { deletePraceAction } from "@/lib/actions/prace";
 import { requireSession } from "@/lib/auth/require-session";
 import { formatCas, formatDate, formatMoney } from "@/lib/format";
+import { exportCastka } from "@/lib/work-hours";
 import { druhCinnostiLabels, stavFakturaceLabels } from "@/lib/labels";
 import { getPrace } from "@/lib/queries/prace";
 
@@ -25,7 +26,7 @@ export default async function PraceDetailPage({
       title={`Práce ${formatDate(row.datum)}`}
       actions={
         <>
-          <Button href={`/prace/${id}/upravit`} variant="secondary">
+          <Button href={`/prace?upravit=${id}`} variant="secondary">
             Upravit
           </Button>
           <DeleteForm action={deletePraceAction.bind(null, id)} />
@@ -47,11 +48,19 @@ export default async function PraceDetailPage({
             <Link href={`/projekty/${row.projekt_id}`} className="text-primary hover:underline">
               {row.projekt_nazev}
             </Link>
+            {row.projekt_zakazka ? (
+              <span className="text-gray-500"> ({row.projekt_zakazka})</span>
+            ) : null}
           </p>
           <p><span className="text-gray-500">Pracovník:</span> {row.pracovnik_jmeno}</p>
           <p><span className="text-gray-500">Čas:</span> {formatCas(row.hodiny, row.minuty)}</p>
+          <p>
+            <span className="text-gray-500">Fakturace:</span>{" "}
+            {formatMoney(
+              exportCastka(row.hodiny, row.minuty, row.projekt_sazba_fak, row.castka_fakturace),
+            )}
+          </p>
           <p><span className="text-gray-500">Druh:</span> {row.druh_cinnosti ? druhCinnostiLabels[row.druh_cinnosti] : "—"}</p>
-          <p><span className="text-gray-500">Fakturace:</span> {formatMoney(row.castka_fakturace)}</p>
           <p><span className="text-gray-500">Náklady:</span> {formatMoney(row.castka_naklady)}</p>
           <p><span className="text-gray-500">Stav fakturace:</span> {stavFakturaceLabels[row.stav_fakturace]}</p>
           {row.popis ? <p><span className="text-gray-500">Popis:</span> {row.popis}</p> : null}

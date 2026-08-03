@@ -1,0 +1,107 @@
+import ExcelJS from "exceljs";
+import { druhCinnostiLabels } from "@/lib/labels";
+import type { OdvedenaPrace } from "@/lib/types";
+import {
+  exportCastka,
+  toExcelDayFraction,
+  workerInitials,
+} from "@/lib/work-hours";
+
+function parseDatum(value: string): Date {
+  const [y, m, d] = value.slice(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0);
+}
+
+export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string): string {
+  const yyyymm = mesic.replace("-", "");
+  const pracovnici = new Set(rows.map((r) => r.pracovnik_id));
+  const zakazky = new Set(
+    rows.map((r) => r.projekt_zakazka).filter((z): z is string => Boolean(z?.trim())),
+  );
+
+  let prefix = "Vykaz";
+  if (pracovnici.size === 1) {
+    const row = rows[0];
+    if (row.pracovnik_prijmeni && row.pracovnik_jmeno_krestni) {
+      prefix = workerInitials(row.pracovnik_prijmeni, row.pracovnik_jmeno_krestni);
+    }
+  }
+
+  const suffix =
+    zakazky.size === 1 ? [...zakazky][0] : zakazky.size > 1 ? "mix" : "export";
+
+  return `${prefix}_Vykaz_prace_${yyyymm}_${suffix}.xlsx`;
+}
+
+export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS.Buffer> {
+  const sorted = [...rows].sort((a, b) => {
+    const byDate = a.datum.localeCompare(b.datum);
+    if (byDate !== 0) return byDate;
+    return (a.pracovnik_jmeno ?? "").localeCompare(b.pracovnik_jmeno ?? "");
+  });
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet("Výkaz práce");
+
+  ws.columns = [
+    { header: "#", key: "num", width: 4 },
+    { header: "Datum", key: "datum", width: 12 },
+    { header: "Zakázka", key: "zakazka", width: 14 },
+    { header: "Pracovník", key: "pracovnik", width: 22 },
+    { header: "Počet hodin", key: "hodiny", width: 14 },
+    { header: "Činnost", key: "cinnost", width: 14 },
+    { header: "Popis", key: "popis", width: 48 },
+    { header: "Fakturační cena", key: "cena", width: 16 },
+  ];
+
+  const header = ws.getRow(1);
+  header.font = { bold: true };
+
+  let sumHours = 0;
+  let sumCena = 0;
+
+  for (const row of sorted) {
+    const hoursFrac = toExcelDayFraction(row.hodiny, row.minuty);
+    const cena = exportCastka(
+      row.hodiny,
+      row.minuty,
+      row.projekt_sazba_fak,
+      row.castka_fakturace,
+    );
+    sumHours += hoursFrac;
+    sumCena += cena;
+
+    const dataRow = ws.addRow({
+      num: "",
+      datum: parseDatum(row.datum),
+      zakazka: row.projekt_zakazka ?? row.projekt_nazev ?? "",
+      pracovnik: row.pracovnik_jmeno ?? "",
+      hodiny: hoursFrac,
+      cinnost: row.druh_cinnosti ? druhCinnostiLabels[row.druh_cinnosti] : "Práce",
+      popis: row.popis ?? "",
+      cena,
+    });
+
+    dataRow.getCell("datum").numFmt = "d.m.yyyy";
+    dataRow.getCell("hodiny").numFmt = "0.000000000000000";
+    dataRow.getCell("cena").numFmt = "0";
+  }
+
+  const emptyRows = 2;
+  for (let i = 0; i < emptyRows; i++) ws.addRow([]);
+
+  const sumRow = ws.addRow({
+    num: "",
+    datum: "",
+    zakazka: "",
+    pracovnik: "",
+    hodiny: sumHours,
+    cinnost: "",
+    popis: "",
+    cena: sumCena,
+  });
+  sumRow.getCell("hodiny").numFmt = "0.000000000000000";
+  sumRow.getCell("cena").numFmt = "0";
+
+  return wb.xlsx.writeBuffer();
+}

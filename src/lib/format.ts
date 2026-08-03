@@ -9,6 +9,8 @@ const czMoney = new Intl.NumberFormat("cs-CZ", {
   maximumFractionDigits: 2,
 });
 
+import { effectiveWorkHours } from "./work-hours";
+
 export function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
   const d = new Date(value);
@@ -24,8 +26,11 @@ export function formatMoney(value: string | number | null | undefined, mena = "C
 }
 
 export function formatCas(hodiny: number, minuty: number): string {
-  if (minuty === 0) return `${hodiny} h`;
-  return `${hodiny} h ${minuty} min`;
+  const total = effectiveWorkHours(hodiny, minuty);
+  const h = Math.floor(total);
+  const m = Math.round((total - h) * 60);
+  if (m === 0) return `${h} h`;
+  return `${h} h ${m} min`;
 }
 
 export function todayIso(): string {
