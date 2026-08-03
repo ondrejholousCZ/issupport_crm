@@ -68,6 +68,7 @@ CREATE TRIGGER trg_pracovnik_updated_at
 CREATE TABLE crmissp.projekt (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nazev_projektu        VARCHAR(300) NOT NULL,
+  zakazka               VARCHAR(50),
   zakaznik_id           UUID NOT NULL REFERENCES crmissp.zakaznik(id) ON DELETE RESTRICT,
   datum_od              DATE,
   datum_do              DATE,

@@ -13,6 +13,7 @@ async function guard() {
 function parse(formData: FormData) {
   return {
     nazev_projektu: formStr(formData, "nazev_projektu"),
+    zakazka: formOptStr(formData, "zakazka"),
     zakaznik_id: formStr(formData, "zakaznik_id"),
     datum_od: formOptStr(formData, "datum_od"),
     datum_do: formOptStr(formData, "datum_do"),

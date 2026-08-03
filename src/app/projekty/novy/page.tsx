@@ -24,6 +24,12 @@ export default async function NovyProjektPage({
           <form action={createProjektAction} className="space-y-4">
             <FormGrid>
               <FormField label="Název projektu" name="nazev_projektu" required />
+              <FormField
+                label="Zkrácený název (zakázka)"
+                name="zakazka"
+                placeholder="např. PGRLF, Gerkin"
+                hint="Krátký kód pro sloupec Zakázka ve výkazu práce (Excel)"
+              />
               <FormSelect
                 label="Zákazník"
                 name="zakaznik_id"

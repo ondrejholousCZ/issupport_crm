@@ -80,9 +80,10 @@ export default async function ZakaznikDetailPage({
               <EmptyState message="Žádné projekty." />
             ) : (
               <MiniTable
-                headers={["Název", "Sazba", "Stav"]}
+                headers={["Název", "Zakázka", "Sazba", "Stav"]}
                 rows={projekty.map((p) => [
                   <Link key={p.id} href={`/projekty/${p.id}`} className="text-primary hover:underline">{p.nazev_projektu}</Link>,
+                  p.zakazka ?? "—",
                   formatMoney(p.hodinova_sazba_fak, p.mena),
                   projektStavLabels[p.stav],
                 ])}

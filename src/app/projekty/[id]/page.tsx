@@ -35,6 +35,8 @@ export default async function ProjektDetailPage({
       <Card className="max-w-2xl">
         <CardHeader title="Detail projektu" />
         <CardBody className="space-y-2 text-sm">
+          <p><span className="text-gray-500">Název:</span> {row.nazev_projektu}</p>
+          {row.zakazka ? <p><span className="text-gray-500">Zakázka:</span> {row.zakazka}</p> : null}
           <p>
             <span className="text-gray-500">Zákazník:</span>{" "}
             <Link href={`/zakaznici/${row.zakaznik_id}`} className="text-primary hover:underline">

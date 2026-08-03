@@ -42,6 +42,7 @@ export interface Pracovnik {
 export interface Projekt {
   id: string;
   nazev_projektu: string;
+  zakazka: string | null;
   zakaznik_id: string;
   datum_od: string | null;
   datum_do: string | null;
@@ -109,6 +110,7 @@ export interface OdvedenaPrace {
   updated_at: string;
   zakaznik_nazev?: string;
   projekt_nazev?: string;
+  projekt_zakazka?: string | null;
   pracovnik_jmeno?: string;
 }
 

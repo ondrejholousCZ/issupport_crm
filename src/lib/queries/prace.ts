@@ -23,6 +23,7 @@ export async function listPrace(filters?: {
     `SELECT op.*,
             z.nazev AS zakaznik_nazev,
             p.nazev_projektu AS projekt_nazev,
+            p.zakazka AS projekt_zakazka,
             CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno
      FROM odvedena_prace op
      JOIN zakaznik z ON z.id = op.zakaznik_id
@@ -40,6 +41,7 @@ export async function getPrace(id: string): Promise<OdvedenaPrace | null> {
     `SELECT op.*,
             z.nazev AS zakaznik_nazev,
             p.nazev_projektu AS projekt_nazev,
+            p.zakazka AS projekt_zakazka,
             CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno
      FROM odvedena_prace op
      JOIN zakaznik z ON z.id = op.zakaznik_id

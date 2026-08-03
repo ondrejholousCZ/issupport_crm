@@ -28,6 +28,7 @@ export async function getProjekt(id: string): Promise<Projekt | null> {
 
 export async function createProjekt(data: {
   nazev_projektu: string;
+  zakazka?: string;
   zakaznik_id: string;
   datum_od?: string;
   datum_do?: string;
@@ -36,10 +37,11 @@ export async function createProjekt(data: {
   stav: string;
 }) {
   const result = await query<Projekt>(
-    `INSERT INTO projekt (nazev_projektu, zakaznik_id, datum_od, datum_do, hodinova_sazba_fak, mena, stav)
-     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+    `INSERT INTO projekt (nazev_projektu, zakazka, zakaznik_id, datum_od, datum_do, hodinova_sazba_fak, mena, stav)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
     [
       data.nazev_projektu,
+      data.zakazka || null,
       data.zakaznik_id,
       data.datum_od || null,
       data.datum_do || null,
@@ -55,6 +57,7 @@ export async function updateProjekt(
   id: string,
   data: {
     nazev_projektu: string;
+    zakazka?: string;
     zakaznik_id: string;
     datum_od?: string;
     datum_do?: string;
@@ -65,12 +68,13 @@ export async function updateProjekt(
 ) {
   const result = await query<Projekt>(
     `UPDATE projekt SET
-      nazev_projektu = $2, zakaznik_id = $3, datum_od = $4, datum_do = $5,
-      hodinova_sazba_fak = $6, mena = $7, stav = $8
+      nazev_projektu = $2, zakazka = $3, zakaznik_id = $4, datum_od = $5, datum_do = $6,
+      hodinova_sazba_fak = $7, mena = $8, stav = $9
      WHERE id = $1 RETURNING *`,
     [
       id,
       data.nazev_projektu,
+      data.zakazka || null,
       data.zakaznik_id,
       data.datum_od || null,
       data.datum_do || null,
@@ -89,10 +93,18 @@ export async function deleteProjekt(id: string) {
 export async function listProjektOptions(zakaznikId?: string) {
   const result = await query<{ id: string; label: string; zakaznik_id: string }>(
     zakaznikId
-      ? `SELECT p.id, p.nazev_projektu AS label, p.zakaznik_id
+      ? `SELECT p.id,
+                COALESCE(NULLIF(p.zakazka, ''), p.nazev_projektu) AS label,
+                p.zakaznik_id
          FROM projekt p WHERE p.zakaznik_id = $1 AND p.stav = 'aktivni'
          ORDER BY p.nazev_projektu`
-      : `SELECT p.id, CONCAT(z.nazev, ' — ', p.nazev_projektu) AS label, p.zakaznik_id
+      : `SELECT p.id,
+                CONCAT(
+                  z.nazev, ' — ',
+                  COALESCE(NULLIF(p.zakazka, ''), p.nazev_projektu),
+                  CASE WHEN p.zakazka IS NOT NULL AND p.zakazka <> '' THEN CONCAT(' (', p.nazev_projektu, ')') ELSE '' END
+                ) AS label,
+                p.zakaznik_id
          FROM projekt p JOIN zakaznik z ON z.id = p.zakaznik_id
          WHERE p.stav = 'aktivni'
          ORDER BY z.nazev, p.nazev_projektu`,

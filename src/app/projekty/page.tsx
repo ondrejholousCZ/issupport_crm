@@ -24,6 +24,7 @@ export default async function ProjektyPage() {
             <thead className="bg-gray-50 border-b border-border">
               <tr>
                 <th className="text-left px-4 py-3 font-medium">Projekt</th>
+                <th className="text-left px-4 py-3 font-medium">Zakázka</th>
                 <th className="text-left px-4 py-3 font-medium">Zákazník</th>
                 <th className="text-left px-4 py-3 font-medium">Období</th>
                 <th className="text-left px-4 py-3 font-medium">Sazba</th>
@@ -38,6 +39,7 @@ export default async function ProjektyPage() {
                       {row.nazev_projektu}
                     </Link>
                   </td>
+                  <td className="px-4 py-3 text-gray-600">{row.zakazka ?? "—"}</td>
                   <td className="px-4 py-3">{row.zakaznik_nazev}</td>
                   <td className="px-4 py-3">
                     {formatDate(row.datum_od)} – {formatDate(row.datum_do)}
