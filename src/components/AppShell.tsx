@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 
 const navItems = [
   { href: "/", label: "Přehled" },
@@ -49,14 +50,9 @@ export async function AppShell({
               "use server";
               await signOut({ redirectTo: "/login" });
             }}
-            className="mt-3"
+            className="mt-0"
           >
-            <button
-              type="submit"
-              className="text-xs text-sidebar-text hover:text-white transition-colors"
-            >
-              Odhlásit se
-            </button>
+            <SignOutButton />
           </form>
         </div>
       </aside>

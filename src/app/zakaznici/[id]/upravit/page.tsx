@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { Card, CardBody } from "@/components/ui/Card";
 import { FormField, FormGrid, FormSelect, FormTextarea } from "@/components/ui/FormField";
 import { updateZakaznikAction } from "@/lib/actions/zakaznik";
@@ -43,7 +44,7 @@ export default async function UpravitZakaznikPage({
             </FormGrid>
             <FormTextarea label="Postup fakturace" name="postup_fakturace" defaultValue={row.postup_fakturace ?? ""} />
             <div className="flex gap-2 pt-2">
-              <Button type="submit">Uložit</Button>
+              <SubmitButton>Uložit</SubmitButton>
               <Button href={`/zakaznici/${id}`} variant="secondary">
                 Zrušit
               </Button>

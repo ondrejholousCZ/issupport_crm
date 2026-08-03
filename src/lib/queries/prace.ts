@@ -127,3 +127,8 @@ export async function updatePrace(
 export async function deletePrace(id: string) {
   await query(`DELETE FROM odvedena_prace WHERE id = $1`, [id]);
 }
+
+export async function deletePraceBulk(ids: string[]) {
+  if (ids.length === 0) return;
+  await query(`DELETE FROM odvedena_prace WHERE id = ANY($1::uuid[])`, [ids]);
+}

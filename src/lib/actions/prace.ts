@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/require-session";
 import { parseCas } from "@/lib/cas";
 import { formInt, formOptStr, formStr } from "@/lib/form";
-import { createPrace, deletePrace, updatePrace } from "@/lib/queries/prace";
+import { createPrace, deletePrace, deletePraceBulk, updatePrace } from "@/lib/queries/prace";
 
 async function guard() {
   if (!(await requireSession())) redirect("/login");
@@ -83,6 +83,15 @@ export async function updatePraceAction(id: string, formData: FormData) {
 export async function deletePraceAction(id: string) {
   await guard();
   await deletePrace(id);
+  revalidatePath("/prace");
+  redirect("/prace");
+}
+
+export async function deletePraceBulkAction(formData: FormData) {
+  await guard();
+  const ids = formData.getAll("ids").map(String).filter(Boolean);
+  if (ids.length === 0) redirect("/prace");
+  await deletePraceBulk(ids);
   revalidatePath("/prace");
   redirect("/prace");
 }

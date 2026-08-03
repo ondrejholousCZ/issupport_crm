@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 
 export function DeleteForm({
   action,
@@ -16,9 +16,9 @@ export function DeleteForm({
         if (!confirm("Opravdu smazat tento záznam?")) e.preventDefault();
       }}
     >
-      <Button type="submit" variant="danger">
+      <SubmitButton variant="danger">
         {label}
-      </Button>
+      </SubmitButton>
     </form>
   );
 }

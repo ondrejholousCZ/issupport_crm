@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { Card, CardBody } from "@/components/ui/Card";
 import { FormField, FormGrid, FormSelect } from "@/components/ui/FormField";
 import { updateProjektAction } from "@/lib/actions/projekt";
@@ -53,7 +54,7 @@ export default async function UpravitProjektPage({
               />
             </FormGrid>
             <div className="flex gap-2 pt-2">
-              <Button type="submit">Uložit</Button>
+              <SubmitButton>Uložit</SubmitButton>
               <Button href={`/projekty/${id}`} variant="secondary">
                 Zrušit
               </Button>

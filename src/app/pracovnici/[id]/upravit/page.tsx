@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { Card, CardBody } from "@/components/ui/Card";
 import { FormField, FormGrid, FormSelect } from "@/components/ui/FormField";
 import { updatePracovnikAction } from "@/lib/actions/pracovnik";
@@ -38,7 +39,7 @@ export default async function UpravitPracovnikaPage({
               <FormField label="Sazba platná od" name="sazba_platna_od" type="date" defaultValue={row.sazba_platna_od ?? ""} />
             </FormGrid>
             <div className="flex gap-2 pt-2">
-              <Button type="submit">Uložit</Button>
+              <SubmitButton>Uložit</SubmitButton>
               <Button href={`/pracovnici/${id}`} variant="secondary">
                 Zrušit
               </Button>

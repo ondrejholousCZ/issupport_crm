@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { Card, CardBody } from "@/components/ui/Card";
 import { FormField, FormGrid, FormSelect } from "@/components/ui/FormField";
 import { updateFakturaAction } from "@/lib/actions/faktura";
@@ -77,7 +78,7 @@ export default async function UpravitFakturuPage({
               <FormField label="External ref" name="external_ref" defaultValue={row.external_ref ?? ""} />
             </FormGrid>
             <div className="flex gap-2 pt-2">
-              <Button type="submit">Uložit</Button>
+              <SubmitButton>Uložit</SubmitButton>
               <Button href={`/faktury/${id}`} variant="secondary">
                 Zrušit
               </Button>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormField, FormGrid, FormSelect, FormTextarea } from "@/components/ui/FormField";
 import { zakaznikStavLabels } from "@/lib/labels";
 
@@ -106,14 +107,15 @@ export function ZakaznikForm({
             placeholder="12345678"
             className="flex-1 rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
-          <button
+          <Button
             type="button"
             onClick={handleLookup}
-            disabled={lookupLoading || !ico.trim()}
-            className="shrink-0 rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            disabled={!ico.trim()}
+            loading={lookupLoading}
+            variant="secondary"
           >
-            {lookupLoading ? "Načítám…" : "Načti z DAIS"}
-          </button>
+            Načti z DAIS
+          </Button>
         </div>
         <p className="text-xs text-gray-500 mt-1">Vyplní název a fakturační adresu z ARES.</p>
       </div>
@@ -179,7 +181,7 @@ export function ZakaznikForm({
       ) : null}
 
       <div className="flex gap-2 pt-2">
-        <Button type="submit">{submitLabel}</Button>
+        <SubmitButton>{submitLabel}</SubmitButton>
         <Button href={cancelHref} variant="secondary">
           Zrušit
         </Button>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { Card, CardBody } from "@/components/ui/Card";
 import { FormField, FormGrid, FormSelect } from "@/components/ui/FormField";
 import { createPracovnikAction } from "@/lib/actions/pracovnik";
@@ -30,7 +31,7 @@ export default async function NovyPracovnikPage() {
               <FormField label="Sazba platná od" name="sazba_platna_od" type="date" />
             </FormGrid>
             <div className="flex gap-2 pt-2">
-              <Button type="submit">Uložit</Button>
+              <SubmitButton>Uložit</SubmitButton>
               <Button href="/pracovnici" variant="secondary">
                 Zrušit
               </Button>

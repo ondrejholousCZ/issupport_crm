@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { Card, CardBody } from "@/components/ui/Card";
 import { FormField, FormGrid, FormSelect } from "@/components/ui/FormField";
 import { updateSluzbaAction } from "@/lib/actions/sluzba";
@@ -57,7 +58,7 @@ export default async function UpravitSluzbuPage({
               />
             </FormGrid>
             <div className="flex gap-2 pt-2">
-              <Button type="submit">Uložit</Button>
+              <SubmitButton>Uložit</SubmitButton>
               <Button href={`/sluzby/${id}`} variant="secondary">
                 Zrušit
               </Button>

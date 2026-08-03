@@ -1,3 +1,4 @@
+import { MicrosoftLoginButton } from "@/components/auth/MicrosoftLoginButton";
 import { signIn } from "@/auth";
 
 export default async function LoginPage({
@@ -30,12 +31,7 @@ export default async function LoginPage({
             });
           }}
         >
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-primary hover:bg-primary-hover text-white font-medium py-3 px-4 transition-colors"
-          >
-            Přihlásit se přes Microsoft
-          </button>
+          <MicrosoftLoginButton />
         </form>
       </div>
     </div>

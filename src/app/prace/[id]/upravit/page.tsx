@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { Card, CardBody } from "@/components/ui/Card";
 import { CasInput } from "@/components/prace/CasInput";
 import { FormField, FormGrid, FormSelect, FormTextarea } from "@/components/ui/FormField";
@@ -65,7 +66,7 @@ export default async function UpravitPracePage({
             </FormGrid>
             <FormTextarea label="Popis" name="popis" defaultValue={row.popis ?? ""} />
             <div className="flex gap-2 pt-2">
-              <Button type="submit">Uložit</Button>
+              <SubmitButton>Uložit</SubmitButton>
               <Button href={`/prace/${id}`} variant="secondary">
                 Zrušit
               </Button>

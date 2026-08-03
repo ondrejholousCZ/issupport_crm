@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormGrid, FormSelect, FormTextarea } from "@/components/ui/FormField";
 import { createPraceAction } from "@/lib/actions/prace";
 import { todayIso } from "@/lib/format";
@@ -60,7 +61,7 @@ export function NovaPraceForm({
       </FormGrid>
       <FormTextarea label="Popis" name="popis" />
       <div className="flex gap-2 pt-2">
-        <Button type="submit">Uložit</Button>
+        <SubmitButton>Uložit</SubmitButton>
         <Button type="button" variant="secondary" onClick={onCancel}>
           Zrušit
         </Button>
