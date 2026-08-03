@@ -2,22 +2,22 @@ import { query } from "@/lib/db";
 import type { OdvedenaPrace } from "@/lib/types";
 
 export async function listPrace(filters?: {
-  zakaznikId?: string;
-  projektId?: string;
+  zakaznikIds?: string[];
+  projektIds?: string[];
   mesic?: string;
-  pracovnikId?: string;
-  stavFakturace?: string;
+  pracovnikIds?: string[];
+  stavFakturace?: string[];
 }): Promise<OdvedenaPrace[]> {
   const clauses: string[] = [];
-  const params: string[] = [];
+  const params: (string | string[])[] = [];
 
-  if (filters?.zakaznikId) {
-    params.push(filters.zakaznikId);
-    clauses.push(`op.zakaznik_id = $${params.length}`);
+  if (filters?.zakaznikIds?.length) {
+    params.push(filters.zakaznikIds);
+    clauses.push(`op.zakaznik_id = ANY($${params.length}::uuid[])`);
   }
-  if (filters?.projektId) {
-    params.push(filters.projektId);
-    clauses.push(`op.projekt_id = $${params.length}`);
+  if (filters?.projektIds?.length) {
+    params.push(filters.projektIds);
+    clauses.push(`op.projekt_id = ANY($${params.length}::uuid[])`);
   }
   if (filters?.mesic) {
     params.push(`${filters.mesic}-01`);
@@ -25,13 +25,13 @@ export async function listPrace(filters?: {
     clauses.push(`op.datum >= $${mesicIdx}::date`);
     clauses.push(`op.datum < ($${mesicIdx}::date + interval '1 month')`);
   }
-  if (filters?.pracovnikId) {
-    params.push(filters.pracovnikId);
-    clauses.push(`op.pracovnik_id = $${params.length}`);
+  if (filters?.pracovnikIds?.length) {
+    params.push(filters.pracovnikIds);
+    clauses.push(`op.pracovnik_id = ANY($${params.length}::uuid[])`);
   }
-  if (filters?.stavFakturace) {
+  if (filters?.stavFakturace?.length) {
     params.push(filters.stavFakturace);
-    clauses.push(`op.stav_fakturace = $${params.length}`);
+    clauses.push(`op.stav_fakturace = ANY($${params.length}::text[])`);
   }
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";

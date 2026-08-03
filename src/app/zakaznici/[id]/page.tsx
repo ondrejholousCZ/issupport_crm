@@ -35,7 +35,7 @@ export default async function ZakaznikDetailPage({
     listProjekty(id),
     listSluzby(id),
     listFaktury(id),
-    listPrace({ zakaznikId: id }),
+    listPrace({ zakaznikIds: [id] }),
   ]);
 
   return (

@@ -2,13 +2,11 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
-import { Button } from "@/components/ui/Button";
 import { MesicPicker } from "@/components/prace/MesicPicker";
-import { praceFiltersToQuery, type PraceFilters } from "@/lib/prace-filters";
+import { Button } from "@/components/ui/Button";
+import { MultiSelect } from "@/components/ui/MultiSelect";
 import { stavFakturaceLabels } from "@/lib/labels";
-
-const controlClass =
-  "h-[38px] w-full min-w-0 rounded-lg border border-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30";
+import { praceFiltersToQuery, praceFiltersToSearchParams, type PraceFilters } from "@/lib/prace-filters";
 
 type Option = { id: string; label: string; zakaznik_id?: string };
 
@@ -29,6 +27,18 @@ function FilterField({
   );
 }
 
+function pruneProjektIds(
+  projektIds: string[],
+  zakaznikIds: string[],
+  projekty: Option[],
+): string[] {
+  if (zakaznikIds.length === 0) return projektIds;
+  const allowed = new Set(
+    projekty.filter((p) => p.zakaznik_id && zakaznikIds.includes(p.zakaznik_id)).map((p) => p.id),
+  );
+  return projektIds.filter((id) => allowed.has(id));
+}
+
 export function PraceFilters({
   filters,
   pracovnici,
@@ -47,15 +57,21 @@ export function PraceFilters({
   const [exportError, setExportError] = useState<string | null>(null);
 
   const filteredProjekty = useMemo(() => {
-    if (!filters.zakaznikId) return projekty;
-    return projekty.filter((p) => p.zakaznik_id === filters.zakaznikId);
-  }, [projekty, filters.zakaznikId]);
+    if (filters.zakaznikIds.length === 0) return projekty;
+    const set = new Set(filters.zakaznikIds);
+    return projekty.filter((p) => p.zakaznik_id && set.has(p.zakaznik_id));
+  }, [projekty, filters.zakaznikIds]);
+
+  const stavOptions = useMemo(
+    () => Object.entries(stavFakturaceLabels).map(([id, label]) => ({ id, label })),
+    [],
+  );
 
   const applyFilters = useCallback(
     (next: Partial<PraceFilters>) => {
       const merged: PraceFilters = { ...filters, ...next };
-      if (next.zakaznikId !== undefined && next.zakaznikId !== filters.zakaznikId) {
-        merged.projektId = undefined;
+      if (next.zakaznikIds !== undefined) {
+        merged.projektIds = pruneProjektIds(merged.projektIds, merged.zakaznikIds, projekty);
       }
       const extra: Record<string, string> = {};
       const nova = searchParams.get("nova");
@@ -67,20 +83,14 @@ export function PraceFilters({
         router.push(qs ? `/prace?${qs}` : "/prace");
       });
     },
-    [filters, router, searchParams],
+    [filters, projekty, router, searchParams],
   );
 
   async function handleExport() {
     setExportLoading(true);
     setExportError(null);
     try {
-      const params = new URLSearchParams();
-      params.set("mesic", filters.mesic);
-      if (filters.pracovnikId) params.set("pracovnik", filters.pracovnikId);
-      if (filters.projektId) params.set("projekt", filters.projektId);
-      if (filters.zakaznikId) params.set("zakaznik", filters.zakaznikId);
-      if (filters.stav) params.set("stav", filters.stav);
-
+      const params = praceFiltersToSearchParams(filters);
       const res = await fetch(`/api/prace/export?${params}`);
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
@@ -110,70 +120,43 @@ export function PraceFilters({
     <div className="space-y-2">
       <div className="flex flex-wrap items-end gap-x-3 gap-y-3">
         <FilterField label="Měsíc" className="w-[180px]">
-          <MesicPicker
-            value={filters.mesic}
-            onChange={(mesic) => applyFilters({ mesic })}
-          />
+          <MesicPicker value={filters.mesic} onChange={(mesic) => applyFilters({ mesic })} />
         </FilterField>
 
         <FilterField label="Pracovník" className="w-[180px]">
-          <select
-            value={filters.pracovnikId ?? ""}
-            onChange={(e) => applyFilters({ pracovnikId: e.target.value || undefined })}
-            className={controlClass}
-          >
-            <option value="">Všichni</option>
-            {pracovnici.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+          <MultiSelect
+            options={pracovnici}
+            value={filters.pracovnikIds}
+            onChange={(pracovnikIds) => applyFilters({ pracovnikIds })}
+            emptyLabel="Všichni"
+          />
         </FilterField>
 
         <FilterField label="Zákazník" className="w-[200px]">
-          <select
-            value={filters.zakaznikId ?? ""}
-            onChange={(e) => applyFilters({ zakaznikId: e.target.value || undefined })}
-            className={controlClass}
-          >
-            <option value="">Všichni</option>
-            {zakaznici.map((z) => (
-              <option key={z.id} value={z.id}>
-                {z.label}
-              </option>
-            ))}
-          </select>
+          <MultiSelect
+            options={zakaznici}
+            value={filters.zakaznikIds}
+            onChange={(zakaznikIds) => applyFilters({ zakaznikIds })}
+            emptyLabel="Všichni"
+          />
         </FilterField>
 
         <FilterField label="Projekt" className="w-[220px]">
-          <select
-            value={filters.projektId ?? ""}
-            onChange={(e) => applyFilters({ projektId: e.target.value || undefined })}
-            className={controlClass}
-          >
-            <option value="">Všechny</option>
-            {filteredProjekty.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+          <MultiSelect
+            options={filteredProjekty}
+            value={filters.projektIds}
+            onChange={(projektIds) => applyFilters({ projektIds })}
+            emptyLabel="Všechny"
+          />
         </FilterField>
 
         <FilterField label="Stav" className="w-[160px]">
-          <select
-            value={filters.stav ?? ""}
-            onChange={(e) => applyFilters({ stav: e.target.value || undefined })}
-            className={controlClass}
-          >
-            <option value="">Všechny</option>
-            {Object.entries(stavFakturaceLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <MultiSelect
+            options={stavOptions}
+            value={filters.stav}
+            onChange={(stav) => applyFilters({ stav })}
+            emptyLabel="Všechny"
+          />
         </FilterField>
 
         <Button

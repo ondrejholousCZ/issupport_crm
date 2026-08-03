@@ -36,9 +36,9 @@ export default async function PracePage({
   const [rows, projekty, pracovnici, zakaznici, editProjekty] = await Promise.all([
     listPrace({
       mesic: filters.mesic,
-      pracovnikId: filters.pracovnikId,
-      projektId: filters.projektId,
-      zakaznikId: filters.zakaznikId,
+      pracovnikIds: filters.pracovnikIds,
+      projektIds: filters.projektIds,
+      zakaznikIds: filters.zakaznikIds,
       stavFakturace: filters.stav,
     }),
     listProjektOptions(),
@@ -57,7 +57,7 @@ export default async function PracePage({
           projekty={projekty}
           pracovnici={pracovnici}
           defaultOpen={params.nova === "1"}
-          defaultProjekt={params.projekt ?? ""}
+          defaultProjekt={filters.projektIds[0] ?? params.projekt?.split(",")[0] ?? ""}
         />
       }
     >

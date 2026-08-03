@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { buildVykazFilename, buildVykazWorkbook } from "@/lib/export/vykazPrace";
-import { currentMesic } from "@/lib/prace-filters";
+import { currentMesic, parsePraceFilters } from "@/lib/prace-filters";
 import { listPrace } from "@/lib/queries/prace";
 
 export const runtime = "nodejs";
@@ -18,12 +18,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Neplatný parametr mesic (YYYY-MM)" }, { status: 400 });
   }
 
+  const filters = parsePraceFilters({
+    mesic: mesic ?? undefined,
+    pracovnik: sp.get("pracovnik") ?? undefined,
+    projekt: sp.get("projekt") ?? undefined,
+    zakaznik: sp.get("zakaznik") ?? undefined,
+    stav: sp.get("stav") ?? undefined,
+  });
+
   const rows = await listPrace({
-    mesic: mesic ?? currentMesic(),
-    pracovnikId: sp.get("pracovnik") ?? undefined,
-    projektId: sp.get("projekt") ?? undefined,
-    zakaznikId: sp.get("zakaznik") ?? undefined,
-    stavFakturace: sp.get("stav") ?? undefined,
+    mesic: filters.mesic || currentMesic(),
+    pracovnikIds: filters.pracovnikIds,
+    projektIds: filters.projektIds,
+    zakaznikIds: filters.zakaznikIds,
+    stavFakturace: filters.stav,
   });
 
   if (rows.length === 0) {
@@ -31,7 +39,7 @@ export async function GET(request: NextRequest) {
   }
 
   const buffer = await buildVykazWorkbook(rows);
-  const filename = buildVykazFilename(rows, mesic ?? currentMesic());
+  const filename = buildVykazFilename(rows, filters.mesic || currentMesic());
 
   return new NextResponse(buffer, {
     headers: {

@@ -39,29 +39,50 @@ export function rokyProFiltr(): number[] {
 
 export type PraceFilters = {
   mesic: string;
-  pracovnikId?: string;
-  projektId?: string;
-  zakaznikId?: string;
-  stav?: string;
+  pracovnikIds: string[];
+  projektIds: string[];
+  zakaznikIds: string[];
+  stav: string[];
 };
+
+function parseCsv(value?: string): string[] {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function joinCsv(values: string[]): string | undefined {
+  return values.length ? values.join(",") : undefined;
+}
 
 export function parsePraceFilters(params: Record<string, string | undefined>): PraceFilters {
   return {
     mesic: params.mesic && /^\d{4}-\d{2}$/.test(params.mesic) ? params.mesic : currentMesic(),
-    pracovnikId: params.pracovnik || undefined,
-    projektId: params.projekt || undefined,
-    zakaznikId: params.zakaznik || undefined,
-    stav: params.stav || undefined,
+    pracovnikIds: parseCsv(params.pracovnik),
+    projektIds: parseCsv(params.projekt),
+    zakaznikIds: parseCsv(params.zakaznik),
+    stav: parseCsv(params.stav),
   };
 }
 
-export function praceFiltersToQuery(filters: PraceFilters, extra?: Record<string, string>): string {
+export function praceFiltersToSearchParams(filters: PraceFilters): URLSearchParams {
   const q = new URLSearchParams();
   q.set("mesic", filters.mesic);
-  if (filters.pracovnikId) q.set("pracovnik", filters.pracovnikId);
-  if (filters.projektId) q.set("projekt", filters.projektId);
-  if (filters.zakaznikId) q.set("zakaznik", filters.zakaznikId);
-  if (filters.stav) q.set("stav", filters.stav);
+  const pracovnik = joinCsv(filters.pracovnikIds);
+  const projekt = joinCsv(filters.projektIds);
+  const zakaznik = joinCsv(filters.zakaznikIds);
+  const stav = joinCsv(filters.stav);
+  if (pracovnik) q.set("pracovnik", pracovnik);
+  if (projekt) q.set("projekt", projekt);
+  if (zakaznik) q.set("zakaznik", zakaznik);
+  if (stav) q.set("stav", stav);
+  return q;
+}
+
+export function praceFiltersToQuery(filters: PraceFilters, extra?: Record<string, string>): string {
+  const q = praceFiltersToSearchParams(filters);
   if (extra) {
     for (const [k, v] of Object.entries(extra)) {
       if (v) q.set(k, v);
