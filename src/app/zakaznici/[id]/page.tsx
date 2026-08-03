@@ -121,7 +121,7 @@ export default async function ZakaznikDetailPage({
             )}
           </Section>
 
-          <Section title="Odvedená práce" href={`/prace/nova?zakaznik=${id}`}>
+          <Section title="Odvedená práce" href={`/prace?nova=1&zakaznik=${id}`}>
             {prace.length === 0 ? (
               <EmptyState message="Žádné záznamy práce." />
             ) : (

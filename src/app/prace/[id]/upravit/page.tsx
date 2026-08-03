@@ -2,9 +2,11 @@ import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
+import { CasInput } from "@/components/prace/CasInput";
 import { FormField, FormGrid, FormSelect, FormTextarea } from "@/components/ui/FormField";
 import { updatePraceAction } from "@/lib/actions/prace";
 import { requireSession } from "@/lib/auth/require-session";
+import { formatCasInput } from "@/lib/cas";
 import { druhCinnostiLabels, stavFakturaceLabels } from "@/lib/labels";
 import { listPracovnikOptions } from "@/lib/queries/pracovnik";
 import { listProjektOptions } from "@/lib/queries/projekt";
@@ -47,14 +49,13 @@ export default async function UpravitPracePage({
                 defaultValue={row.pracovnik_id}
                 options={pracovnici.map((p) => ({ value: p.id, label: p.label }))}
               />
-              <FormField label="Hodiny" name="hodiny" type="number" defaultValue={row.hodiny} />
-              <FormField label="Minuty" name="minuty" type="number" defaultValue={row.minuty} />
               <FormSelect
                 label="Druh činnosti"
                 name="druh_cinnosti"
                 defaultValue={row.druh_cinnosti ?? "prace"}
                 options={Object.entries(druhCinnostiLabels).map(([value, label]) => ({ value, label }))}
               />
+              <CasInput defaultValue={formatCasInput(row.hodiny, row.minuty)} />
               <FormSelect
                 label="Stav fakturace"
                 name="stav_fakturace"

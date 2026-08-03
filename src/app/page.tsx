@@ -33,7 +33,7 @@ export default async function DashboardPage() {
         ))}
       </div>
       <div className="mt-8 flex gap-3">
-        <Button href="/prace/nova">+ Nová odvedená práce</Button>
+        <Button href="/prace?nova=1">+ Nová odvedená práce</Button>
         <Button href="/zakaznici/novy" variant="secondary">
           + Nový zákazník
         </Button>
