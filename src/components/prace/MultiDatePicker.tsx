@@ -21,6 +21,10 @@ export function MultiDatePicker({ defaultValue }: { defaultValue?: string }) {
     if (!multiMode) setViewMonth(viewMonthFromIso(singleDate));
   }, [singleDate, multiMode]);
 
+  useEffect(() => {
+    if (!multiMode) setSingleOpen(false);
+  }, [singleDate, multiMode]);
+
   const toggleDate = (iso: string) => {
     if (multiMode) {
       setSelectedDates((prev) => {

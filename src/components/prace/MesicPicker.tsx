@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarPanel } from "@/components/ui/CalendarPanel";
 import { Popover } from "@/components/ui/Popover";
+import { MONTH_LABELS, formatMesicLabel } from "@/lib/calendar";
 import { buildMesic, splitMesic } from "@/lib/prace-filters";
-import { formatMesicLabel, viewMonthFromIso } from "@/lib/calendar";
 
 const triggerClass =
   "h-[38px] w-full rounded-lg border border-border bg-white px-3 text-sm text-left focus:outline-none focus:ring-2 focus:ring-primary/30 hover:bg-gray-50/80";
@@ -18,25 +17,19 @@ export function MesicPicker({
 }) {
   const [open, setOpen] = useState(false);
   const { rok, mesic: mesicCislo } = splitMesic(value);
-  const [viewMonth, setViewMonth] = useState(() => viewMonthFromIso(`${value}-01`));
+  const [viewYear, setViewYear] = useState(rok);
 
   useEffect(() => {
-    setViewMonth(viewMonthFromIso(`${value}-01`));
+    setViewYear(rok);
+  }, [rok]);
+
+  useEffect(() => {
+    setOpen(false);
   }, [value]);
 
-  const pickDay = (iso: string) => {
-    const [y, m] = iso.split("-");
-    onChange(buildMesic(Number(y), Number(m)));
+  const pickMonth = (month: number) => {
+    onChange(buildMesic(viewYear, month));
     setOpen(false);
-  };
-
-  const dayClassName = (iso: string) => {
-    const [, m] = iso.split("-");
-    const inSelectedMonth = Number(m) === mesicCislo && viewMonth.year === rok;
-    if (inSelectedMonth && viewMonth.month + 1 === mesicCislo) {
-      return "bg-primary/15 text-primary font-medium hover:bg-primary/25";
-    }
-    return "hover:bg-gray-100 text-foreground";
   };
 
   return (
@@ -55,17 +48,47 @@ export function MesicPicker({
         </button>
       }
     >
-      <CalendarPanel
-        viewMonth={viewMonth}
-        onViewMonthChange={setViewMonth}
-        onDayClick={pickDay}
-        dayClassName={dayClassName}
-        footer={
-          <p className="text-xs text-gray-500">
-            Kliknutím na den vyberete celý měsíc ({formatMesicLabel(value)})
-          </p>
-        }
-      />
+      <div className="w-[280px] p-1">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <button
+            type="button"
+            onClick={() => setViewYear((y) => y - 1)}
+            className="px-2 py-1 text-sm rounded hover:bg-gray-100"
+            aria-label="Předchozí rok"
+          >
+            ‹
+          </button>
+          <span className="text-sm font-medium">{viewYear}</span>
+          <button
+            type="button"
+            onClick={() => setViewYear((y) => y + 1)}
+            className="px-2 py-1 text-sm rounded hover:bg-gray-100"
+            aria-label="Další rok"
+          >
+            ›
+          </button>
+        </div>
+        <div className="grid grid-cols-3 gap-1">
+          {MONTH_LABELS.map((label, idx) => {
+            const monthNum = idx + 1;
+            const selected = viewYear === rok && monthNum === mesicCislo;
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => pickMonth(monthNum)}
+                className={`rounded-lg px-2 py-2 text-sm transition-colors ${
+                  selected
+                    ? "bg-primary text-white font-medium"
+                    : "hover:bg-gray-100 text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </Popover>
   );
 }
