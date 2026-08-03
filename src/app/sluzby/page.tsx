@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { AppShell } from "@/components/AppShell";
-import { Button } from "@/components/ui/Button";
+import { NovaSluzbaModalTrigger } from "@/components/sluzby/NovaSluzbaModal";
+import { UpravitSluzbaModal } from "@/components/sluzby/UpravitSluzbaModal";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SluzbaUrgencyBadge } from "@/components/ui/SluzbaUrgencyBadge";
@@ -9,14 +11,40 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireSession } from "@/lib/auth/require-session";
 import { formatDate, formatMoney } from "@/lib/format";
 import { sluzbaStavLabels } from "@/lib/labels";
-import { listSluzby } from "@/lib/queries/sluzba";
+import { getSluzba, listSluzby } from "@/lib/queries/sluzba";
+import { listZakaznikOptions } from "@/lib/queries/zakaznik";
 
-export default async function SluzbyPage() {
+export default async function SluzbyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ nova?: string; upravit?: string; zakaznik?: string }>;
+}) {
   if (!(await requireSession())) redirect("/login");
-  const rows = await listSluzby();
+  const params = await searchParams;
+  const [rows, zakaznici, editRow] = await Promise.all([
+    listSluzby(),
+    listZakaznikOptions(),
+    params.upravit ? getSluzba(params.upravit) : Promise.resolve(null),
+  ]);
+  if (params.upravit && !editRow) notFound();
 
   return (
-    <AppShell title="Služby" actions={<Button href="/sluzby/nova">+ Nová služba</Button>}>
+    <AppShell
+      title="Služby"
+      actions={
+        <Suspense fallback={null}>
+          <NovaSluzbaModalTrigger
+            zakaznici={zakaznici}
+            defaultOpen={params.nova === "1"}
+            defaultZakaznik={params.zakaznik ?? ""}
+          />
+        </Suspense>
+      }
+    >
+      <Suspense fallback={null}>
+        <UpravitSluzbaModal editRow={editRow} zakaznici={zakaznici} returnPath="/sluzby" />
+      </Suspense>
+
       {rows.length === 0 ? (
         <EmptyState message="Zatím nemáte žádné služby." />
       ) : (

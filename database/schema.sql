@@ -117,6 +117,45 @@ CREATE TRIGGER trg_faktura_updated_at
 -- ============================================================================
 -- 5. SLUŽBA
 -- ============================================================================
+CREATE OR REPLACE FUNCTION crmissp.calc_dalsi_fakturace(
+  p_posledni_platba DATE,
+  p_frekvence VARCHAR,
+  p_frekvence_dnu INTEGER
+) RETURNS DATE
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+  y INT;
+BEGIN
+  IF p_posledni_platba IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  y := EXTRACT(YEAR FROM p_posledni_platba)::INT;
+
+  CASE p_frekvence
+    WHEN 'mesicne' THEN
+      RETURN (date_trunc('month', p_posledni_platba) + INTERVAL '1 month')::DATE;
+    WHEN 'kvartalne' THEN
+      RETURN (date_trunc('quarter', p_posledni_platba) + INTERVAL '3 months')::DATE;
+    WHEN 'pololetne' THEN
+      IF EXTRACT(MONTH FROM p_posledni_platba) <= 6 THEN
+        RETURN make_date(y, 7, 1);
+      ELSE
+        RETURN make_date(y + 1, 1, 1);
+      END IF;
+    WHEN 'rocne' THEN
+      RETURN (date_trunc('month', p_posledni_platba) + INTERVAL '1 year')::DATE;
+    ELSE
+      IF p_frekvence_dnu IS NOT NULL THEN
+        RETURN p_posledni_platba + p_frekvence_dnu;
+      END IF;
+      RETURN NULL;
+  END CASE;
+END;
+$$;
+
 CREATE TABLE crmissp.sluzba (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   zakaznik_id           UUID NOT NULL REFERENCES crmissp.zakaznik(id) ON DELETE RESTRICT,
@@ -127,7 +166,9 @@ CREATE TABLE crmissp.sluzba (
   cena_periody          NUMERIC(14,2) CHECK (cena_periody >= 0),
   mena                  VARCHAR(10) NOT NULL DEFAULT 'CZK',
   posledni_platba       DATE,
-  dalsi_fakturace       DATE GENERATED ALWAYS AS (posledni_platba + frekvence_dnu) STORED,
+  dalsi_fakturace       DATE GENERATED ALWAYS AS (
+                          crmissp.calc_dalsi_fakturace(posledni_platba, frekvence, frekvence_dnu)
+                        ) STORED,
   stav                  VARCHAR(20) NOT NULL DEFAULT 'aktivni'
                           CHECK (stav IN ('aktivni', 'pozastavena', 'ukoncena')),
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
