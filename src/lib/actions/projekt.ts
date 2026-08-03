@@ -25,16 +25,16 @@ function parse(formData: FormData) {
 
 export async function createProjektAction(formData: FormData) {
   await guard();
-  const row = await createProjekt(parse(formData));
+  await createProjekt(parse(formData));
   revalidatePath("/projekty");
-  redirect(`/projekty/${row.id}`);
+  redirect("/projekty");
 }
 
 export async function updateProjektAction(id: string, formData: FormData) {
   await guard();
   await updateProjekt(id, parse(formData));
   revalidatePath("/projekty");
-  redirect(`/projekty/${id}`);
+  redirect("/projekty");
 }
 
 export async function deleteProjektAction(id: string) {

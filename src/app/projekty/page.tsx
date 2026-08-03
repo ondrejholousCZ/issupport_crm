@@ -1,21 +1,49 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { AppShell } from "@/components/AppShell";
-import { Button } from "@/components/ui/Button";
+import { NovaProjektModalTrigger } from "@/components/projekty/NovaProjektModal";
+import { UpravitProjektModal } from "@/components/projekty/UpravitProjektModal";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireSession } from "@/lib/auth/require-session";
 import { formatDate, formatMoney } from "@/lib/format";
 import { projektStavLabels } from "@/lib/labels";
-import { listProjekty } from "@/lib/queries/projekt";
+import { getProjekt, listProjekty } from "@/lib/queries/projekt";
+import { listZakaznikOptions } from "@/lib/queries/zakaznik";
 
-export default async function ProjektyPage() {
+export default async function ProjektyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ nova?: string; upravit?: string; zakaznik?: string }>;
+}) {
   if (!(await requireSession())) redirect("/login");
-  const rows = await listProjekty();
+  const params = await searchParams;
+  const [rows, zakaznici, editRow] = await Promise.all([
+    listProjekty(),
+    listZakaznikOptions(),
+    params.upravit ? getProjekt(params.upravit) : Promise.resolve(null),
+  ]);
+  if (params.upravit && !editRow) notFound();
 
   return (
-    <AppShell title="Projekty" actions={<Button href="/projekty/novy">+ Nový projekt</Button>}>
+    <AppShell
+      title="Projekty"
+      actions={
+        <Suspense fallback={null}>
+          <NovaProjektModalTrigger
+            zakaznici={zakaznici}
+            defaultOpen={params.nova === "1"}
+            defaultZakaznik={params.zakaznik ?? ""}
+          />
+        </Suspense>
+      }
+    >
+      <Suspense fallback={null}>
+        <UpravitProjektModal editRow={editRow} zakaznici={zakaznici} returnPath="/projekty" />
+      </Suspense>
+
       {rows.length === 0 ? (
         <EmptyState message="Zatím nemáte žádné projekty." />
       ) : (
@@ -35,7 +63,10 @@ export default async function ProjektyPage() {
               {rows.map((row) => (
                 <tr key={row.id} className="border-b border-border last:border-0 hover:bg-gray-50/80">
                   <td className="px-4 py-3">
-                    <Link href={`/projekty/${row.id}`} className="text-primary hover:underline font-medium">
+                    <Link
+                      href={`/projekty?upravit=${row.id}`}
+                      className="text-primary hover:underline font-medium"
+                    >
                       {row.nazev_projektu}
                     </Link>
                   </td>

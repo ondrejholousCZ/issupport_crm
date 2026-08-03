@@ -45,7 +45,7 @@ export default async function PraceDetailPage({
           </p>
           <p>
             <span className="text-gray-500">Projekt:</span>{" "}
-            <Link href={`/projekty/${row.projekt_id}`} className="text-primary hover:underline">
+            <Link href={`/projekty?upravit=${row.projekt_id}`} className="text-primary hover:underline">
               {row.projekt_nazev}
             </Link>
             {row.projekt_zakazka ? (

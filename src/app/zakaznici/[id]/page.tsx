@@ -86,14 +86,14 @@ export default async function ZakaznikDetailPage({
         </Card>
 
         <div className="xl:col-span-2 space-y-6">
-          <Section title="Projekty" href={`/projekty/novy?zakaznik=${id}`}>
+          <Section title="Projekty" href={`/projekty?nova=1&zakaznik=${id}`}>
             {projekty.length === 0 ? (
               <EmptyState message="Žádné projekty." />
             ) : (
               <MiniTable
                 headers={["Název", "Zakázka", "Sazba", "Stav"]}
                 rows={projekty.map((p) => [
-                  <Link key={p.id} href={`/projekty/${p.id}`} className="text-primary hover:underline">{p.nazev_projektu}</Link>,
+                  <Link key={p.id} href={`/projekty?upravit=${p.id}`} className="text-primary hover:underline">{p.nazev_projektu}</Link>,
                   p.zakazka ?? "—",
                   formatMoney(p.hodinova_sazba_fak, p.mena),
                   projektStavLabels[p.stav],
