@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { requireSession } from "@/lib/auth/require-session";
 import { parsePraceFilters, praceFiltersToQuery } from "@/lib/prace-filters";
 import { summarizePrace } from "@/lib/prace-summary";
-import { listDistinctProjektNazvy, listProjektOptions } from "@/lib/queries/projekt";
+import { listDistinctProjektZakazky, listProjektOptions } from "@/lib/queries/projekt";
 import { listPracovnikOptions } from "@/lib/queries/pracovnik";
 import { getPrace, listPrace } from "@/lib/queries/prace";
 import { listRozpracovaneVykazy } from "@/lib/queries/vykaz-prace";
@@ -35,16 +35,16 @@ export default async function PracePage({
   const editRow = params.upravit ? await getPrace(params.upravit) : null;
   if (params.upravit && !editRow) notFound();
 
-  const [rows, projektyNazvy, pracovnici, zakaznici, editProjekty, rozpracovaneVykazy, projektyProModal] =
+  const [rows, projektyZakazky, pracovnici, zakaznici, editProjekty, rozpracovaneVykazy, projektyProModal] =
     await Promise.all([
       listPrace({
         mesic: filters.mesic,
         pracovnikIds: filters.pracovnikIds,
-        projektNazvy: filters.projektNazvy,
+        projektZakazky: filters.projektZakazky,
         zakaznikIds: filters.zakaznikIds,
         stavFakturace: filters.stav,
       }),
-      listDistinctProjektNazvy(),
+      listDistinctProjektZakazky(),
       listPracovnikOptions(),
       listZakaznikOptions(),
       editRow ? listProjektOptions(editRow.zakaznik_id) : Promise.resolve([]),
@@ -73,7 +73,7 @@ export default async function PracePage({
           <PraceFilters
             filters={filters}
             pracovnici={pracovnici}
-            projekty={projektyNazvy}
+            projekty={projektyZakazky}
             zakaznici={zakaznici.map((z) => ({ id: z.id, label: z.nazev }))}
             summary={summary}
           />

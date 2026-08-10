@@ -275,9 +275,37 @@ export async function unlockVykaz(vykazId: string) {
 
 export async function removePolozkaFromVykaz(vykazId: string, praceId: string) {
   const vykaz = await getVykaz(vykazId);
-  if (!vykaz || vykaz.stav !== "rozpracovany") throw new Error("Položku lze odebrat jen z rozpracovaného výkazu.");
+  if (!vykaz || vykaz.stav !== "rozpracovany") {
+    throw new Error("Položku lze odebrat jen z rozpracovaného výkazu.");
+  }
   await query(
     `DELETE FROM vykaz_prace_polozka WHERE vykaz_id = $1 AND odvedena_prace_id = $2`,
     [vykazId, praceId],
   );
+  await query(
+    `UPDATE odvedena_prace SET stav_fakturace = 'nefakturovano'
+     WHERE id = $1 AND stav_fakturace = 'schvaleni_vykazu'`,
+    [praceId],
+  );
+}
+
+export async function deleteVykaz(vykazId: string) {
+  const vykaz = await getVykaz(vykazId);
+  if (!vykaz) throw new Error("Výkaz neexistuje.");
+  if (vykaz.stav !== "rozpracovany") {
+    throw new Error("Smazat lze jen rozpracovaný výkaz. Nejdříve ho odemkněte.");
+  }
+
+  const polozky = await getVykazPolozky(vykazId);
+  const ids = polozky.map((p) => p.id);
+
+  await query(`DELETE FROM vykaz_prace WHERE id = $1`, [vykazId]);
+
+  if (ids.length) {
+    await query(
+      `UPDATE odvedena_prace SET stav_fakturace = 'nefakturovano'
+       WHERE id = ANY($1::uuid[]) AND stav_fakturace = 'schvaleni_vykazu'`,
+      [ids],
+    );
+  }
 }

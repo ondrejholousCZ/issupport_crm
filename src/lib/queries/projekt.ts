@@ -94,11 +94,17 @@ export async function deleteProjekt(id: string) {
   await query(`DELETE FROM projekt WHERE id = $1`, [id]);
 }
 
-export async function listDistinctProjektNazvy(): Promise<{ id: string; label: string }[]> {
-  const result = await query<{ nazev: string }>(
-    `SELECT DISTINCT nazev_projektu AS nazev FROM projekt ORDER BY nazev_projektu`,
+export async function listDistinctProjektZakazky(): Promise<{ id: string; label: string }[]> {
+  const result = await query<{ label: string }>(
+    `SELECT DISTINCT COALESCE(NULLIF(TRIM(zakazka), ''), nazev_projektu) AS label
+     FROM projekt
+     ORDER BY label`,
   );
-  return result.rows.map((r) => ({ id: r.nazev, label: r.nazev }));
+  return result.rows.map((r) => ({ id: r.label, label: r.label }));
+}
+
+export async function listDistinctProjektNazvy(): Promise<{ id: string; label: string }[]> {
+  return listDistinctProjektZakazky();
 }
 
 export async function listProjektOptions(zakaznikId?: string) {

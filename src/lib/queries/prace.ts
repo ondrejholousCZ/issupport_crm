@@ -3,7 +3,7 @@ import type { OdvedenaPrace } from "@/lib/types";
 
 export async function listPrace(filters?: {
   zakaznikIds?: string[];
-  projektNazvy?: string[];
+  projektZakazky?: string[];
   mesic?: string;
   pracovnikIds?: string[];
   stavFakturace?: string[];
@@ -15,9 +15,11 @@ export async function listPrace(filters?: {
     params.push(filters.zakaznikIds);
     clauses.push(`op.zakaznik_id = ANY($${params.length}::uuid[])`);
   }
-  if (filters?.projektNazvy?.length) {
-    params.push(filters.projektNazvy);
-    clauses.push(`p.nazev_projektu = ANY($${params.length}::text[])`);
+  if (filters?.projektZakazky?.length) {
+    params.push(filters.projektZakazky);
+    clauses.push(
+      `COALESCE(NULLIF(TRIM(p.zakazka), ''), p.nazev_projektu) = ANY($${params.length}::text[])`,
+    );
   }
   if (filters?.mesic) {
     if (/^\d{4}$/.test(filters.mesic)) {

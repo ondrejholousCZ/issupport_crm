@@ -10,6 +10,8 @@ import {
   addPolozkyToVykaz,
   approveVykaz,
   createVykazWithPolozky,
+  deleteVykaz,
+  removePolozkaFromVykaz,
   sendVykaz,
   unlockVykaz,
 } from "@/lib/queries/vykaz-prace";
@@ -79,6 +81,22 @@ export async function sendVykazAction(vykazId: string, formData: FormData) {
 export async function unlockVykazAction(vykazId: string) {
   await guard();
   await unlockVykaz(vykazId);
+  revalidatePath("/vykazy");
+  revalidatePath("/prace");
+  redirect(`/vykazy?detail=${vykazId}`);
+}
+
+export async function removePolozkaFromVykazAction(vykazId: string, praceId: string) {
+  await guard();
+  await removePolozkaFromVykaz(vykazId, praceId);
+  revalidatePath("/vykazy");
+  revalidatePath("/prace");
+  redirect(`/vykazy?detail=${vykazId}`);
+}
+
+export async function deleteVykazAction(vykazId: string) {
+  await guard();
+  await deleteVykaz(vykazId);
   revalidatePath("/vykazy");
   revalidatePath("/prace");
   redirect("/vykazy");

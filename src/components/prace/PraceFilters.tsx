@@ -128,8 +128,8 @@ export function PraceFilters({
         <FilterField label="Projekt" className="w-[220px]">
           <MultiSelect
             options={projekty}
-            value={filters.projektNazvy}
-            onChange={(projektNazvy) => applyFilters({ projektNazvy })}
+            value={filters.projektZakazky}
+            onChange={(projektZakazky) => applyFilters({ projektZakazky })}
             emptyLabel="Všechny"
           />
         </FilterField>

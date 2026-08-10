@@ -55,7 +55,7 @@ export function rokyProFiltr(): number[] {
 export type PraceFilters = {
   mesic: string;
   pracovnikIds: string[];
-  projektNazvy: string[];
+  projektZakazky: string[];
   zakaznikIds: string[];
   stav: string[];
 };
@@ -77,7 +77,7 @@ export function parsePraceFilters(params: Record<string, string | undefined>): P
     mesic:
       params.mesic && isValidObdobi(params.mesic) ? params.mesic : currentMesic(),
     pracovnikIds: parseCsv(params.pracovnik),
-    projektNazvy: parseCsv(params.projekt),
+    projektZakazky: parseCsv(params.projekt),
     zakaznikIds: parseCsv(params.zakaznik),
     stav: parseCsv(params.stav),
   };
@@ -87,7 +87,7 @@ export function praceFiltersToSearchParams(filters: PraceFilters): URLSearchPara
   const q = new URLSearchParams();
   q.set("mesic", filters.mesic);
   const pracovnik = joinCsv(filters.pracovnikIds);
-  const projekt = joinCsv(filters.projektNazvy);
+  const projekt = joinCsv(filters.projektZakazky);
   const zakaznik = joinCsv(filters.zakaznikIds);
   const stav = joinCsv(filters.stav);
   if (pracovnik) q.set("pracovnik", pracovnik);
