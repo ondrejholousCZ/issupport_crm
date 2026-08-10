@@ -284,6 +284,7 @@ CREATE TABLE crmissp.vykaz_prace (
   poznamka_klienta  TEXT,
   schvaleno_at      TIMESTAMPTZ,
   odeslano_at       TIMESTAMPTZ,
+  odeslano_email    VARCHAR(200),
   approval_token    VARCHAR(64) UNIQUE,
   created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()

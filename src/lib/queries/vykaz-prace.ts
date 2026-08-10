@@ -192,7 +192,7 @@ export async function addPolozkyToVykaz(vykazId: string, praceIds: string[]) {
   }
 }
 
-export async function sendVykaz(vykazId: string) {
+export async function sendVykaz(vykazId: string, odeslanoEmail: string) {
   const vykaz = await getVykaz(vykazId);
   if (!vykaz) throw new Error("Výkaz neexistuje.");
   if (vykaz.stav !== "rozpracovany") throw new Error("Odeslat lze jen rozpracovaný výkaz.");
@@ -205,11 +205,12 @@ export async function sendVykaz(vykazId: string) {
     `UPDATE vykaz_prace SET
        stav = 'odeslany',
        odeslano_at = now(),
-       approval_token = $2,
+       odeslano_email = $2,
+       approval_token = $3,
        poznamka_klienta = NULL,
        schvaleno_at = NULL
      WHERE id = $1`,
-    [vykazId, token],
+    [vykazId, odeslanoEmail, token],
   );
 
   const ids = polozky.map((p) => p.id);
@@ -257,6 +258,7 @@ export async function unlockVykaz(vykazId: string) {
     `UPDATE vykaz_prace SET
        stav = 'rozpracovany',
        odeslano_at = NULL,
+       odeslano_email = NULL,
        schvaleno_at = NULL,
        poznamka_klienta = NULL,
        approval_token = NULL

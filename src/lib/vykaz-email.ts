@@ -1,6 +1,7 @@
+import { buildVykazFilename, buildVykazWorkbook } from "@/lib/export/vykazPrace";
+import { formatCas, formatDate, formatMoney } from "@/lib/format";
 import { MESICE_LABELS } from "@/lib/prace-filters";
 import type { OdvedenaPrace, VykazPrace } from "@/lib/types";
-import { formatCas, formatMoney } from "@/lib/format";
 import { exportCastka } from "@/lib/work-hours";
 import { sendEmail } from "@/lib/sendgrid";
 
@@ -39,36 +40,36 @@ export async function sendVykazApprovalEmail({
       const castka = polozkaCastka(p);
       total += castka;
       return `<tr>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee">${p.datum.toString().slice(0, 10)}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee">${p.projekt_zakazka ?? p.projekt_nazev ?? ""}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee">${p.pracovnik_jmeno ?? ""}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee">${p.popis ?? ""}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right">${formatCas(p.hodiny, p.minuty)}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right">${formatMoney(castka)}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #eee;white-space:nowrap">${formatDate(p.datum)}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #eee">${p.projekt_zakazka ?? p.projekt_nazev ?? ""}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #eee">${p.pracovnik_jmeno ?? ""}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #eee">${p.popis ?? ""}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap">${formatCas(p.hodiny, p.minuty)}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap">${formatMoney(castka)}</td>
       </tr>`;
     })
     .join("");
 
   const html = `
-    <div style="font-family:sans-serif;max-width:720px;color:#111">
+    <div style="font-family:sans-serif;max-width:960px;color:#111">
       <p>Dobrý den,</p>
       <p>zasíláme Vám výkaz práce za období <strong>${obdobiLabel(vykaz.obdobi)}</strong>.</p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;table-layout:auto">
         <thead>
           <tr style="background:#f3f4f6">
-            <th style="padding:8px;text-align:left">Datum</th>
-            <th style="padding:8px;text-align:left">Projekt</th>
-            <th style="padding:8px;text-align:left">Pracovník</th>
-            <th style="padding:8px;text-align:left">Popis</th>
-            <th style="padding:8px;text-align:right">Čas</th>
-            <th style="padding:8px;text-align:right">Částka</th>
+            <th style="padding:10px;text-align:left;white-space:nowrap">Datum</th>
+            <th style="padding:10px;text-align:left">Projekt</th>
+            <th style="padding:10px;text-align:left">Pracovník</th>
+            <th style="padding:10px;text-align:left">Popis</th>
+            <th style="padding:10px;text-align:right;white-space:nowrap">Čas</th>
+            <th style="padding:10px;text-align:right;white-space:nowrap">Částka</th>
           </tr>
         </thead>
         <tbody>${rowsHtml}</tbody>
         <tfoot>
           <tr>
-            <td colspan="5" style="padding:10px 8px;text-align:right;font-weight:bold">Celkem</td>
-            <td style="padding:10px 8px;text-align:right;font-weight:bold">${formatMoney(total)}</td>
+            <td colspan="5" style="padding:12px 10px;text-align:right;font-weight:bold">Celkem</td>
+            <td style="padding:12px 10px;text-align:right;font-weight:bold;white-space:nowrap">${formatMoney(total)}</td>
           </tr>
         </tfoot>
       </table>
@@ -82,9 +83,20 @@ export async function sendVykazApprovalEmail({
       <p style="color:#666;font-size:13px">S pozdravem,<br>ISSP</p>
     </div>`;
 
+  const workbook = await buildVykazWorkbook(polozky);
+  const filename = buildVykazFilename(polozky, vykaz.obdobi);
+  const attachmentContent = Buffer.from(workbook).toString("base64");
+
   await sendEmail({
     to: toEmail,
-    subject: `Výkaz práce ${obdobiLabel(vykaz.obdobi)} — ${vykaz.zakaznik_nazev ?? "schválení"}`,
+    subject: `Výkaz práce ${obdobiLabel(vykaz.obdobi)}`,
     html,
+    attachments: [
+      {
+        filename,
+        content: attachmentContent,
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+    ],
   });
 }

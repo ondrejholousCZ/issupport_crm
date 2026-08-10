@@ -56,6 +56,7 @@ export default async function VykazyPage({
                 <th className="text-left px-4 py-3 font-medium">Zákazník</th>
                 <th className="text-left px-4 py-3 font-medium">Položek</th>
                 <th className="text-left px-4 py-3 font-medium">Stav</th>
+                <th className="text-left px-4 py-3 font-medium">Příjemce</th>
                 <th className="text-left px-4 py-3 font-medium">Odesláno</th>
                 <th className="text-left px-4 py-3 font-medium">Schváleno</th>
               </tr>
@@ -79,6 +80,7 @@ export default async function VykazyPage({
                       tone={vykazTone(row.stav)}
                     />
                   </td>
+                  <td className="px-4 py-3">{row.odeslano_email ?? "—"}</td>
                   <td className="px-4 py-3">{row.odeslano_at ? new Date(row.odeslano_at).toLocaleDateString("cs-CZ") : "—"}</td>
                   <td className="px-4 py-3">{row.schvaleno_at ? new Date(row.schvaleno_at).toLocaleDateString("cs-CZ") : "—"}</td>
                 </tr>

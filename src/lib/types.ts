@@ -131,6 +131,7 @@ export interface VykazPrace {
   poznamka_klienta: string | null;
   schvaleno_at: string | null;
   odeslano_at: string | null;
+  odeslano_email: string | null;
   approval_token: string | null;
   created_at: string;
   updated_at: string;

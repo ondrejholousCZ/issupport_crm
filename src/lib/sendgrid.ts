@@ -1,13 +1,21 @@
 import { sendVykazApprovalEmail } from "@/lib/vykaz-email";
 
+export type EmailAttachment = {
+  filename: string;
+  content: string;
+  type: string;
+};
+
 export async function sendEmail({
   to,
   subject,
   html,
+  attachments,
 }: {
   to: string;
   subject: string;
   html: string;
+  attachments?: EmailAttachment[];
 }) {
   const apiKey = process.env.SENDGRID_API_KEY;
   const fromEmail = process.env.SENDGRID_FROM_EMAIL;
@@ -28,6 +36,12 @@ export async function sendEmail({
       from: { email: fromEmail, name: fromName },
       subject,
       content: [{ type: "text/html", value: html }],
+      attachments: attachments?.map((a) => ({
+        content: a.content,
+        filename: a.filename,
+        type: a.type,
+        disposition: "attachment",
+      })),
     }),
   });
 

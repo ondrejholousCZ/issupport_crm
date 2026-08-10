@@ -82,6 +82,11 @@ export function VykazDetailModal({
           <span className="text-gray-600">
             Částka: <strong>{formatMoney(summary.totalCastka)}</strong>
           </span>
+          {vykaz.odeslano_email ? (
+            <span className="text-gray-600">
+              Příjemce: <strong>{vykaz.odeslano_email}</strong>
+            </span>
+          ) : null}
         </div>
 
         {vykaz.poznamka_klienta ? (

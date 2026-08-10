@@ -11,6 +11,7 @@ import {
   approveVykaz,
   createVykazWithPolozky,
   deleteVykaz,
+  getVykaz,
   removePolozkaFromVykaz,
   sendVykaz,
   unlockVykaz,
@@ -60,12 +61,15 @@ export async function assignPraceToVykazAction(formData: FormData) {
 export async function sendVykazAction(vykazId: string, formData: FormData) {
   await guard();
   const toEmail = formOptStr(formData, "email");
-  const { vykaz, polozky } = await sendVykaz(vykazId);
+  const vykazBefore = await getVykaz(vykazId);
+  if (!vykazBefore) throw new Error("Výkaz neexistuje.");
 
-  const email = toEmail || vykaz.zakaznik_email;
+  const email = toEmail || vykazBefore.zakaznik_email;
   if (!email) {
     throw new Error("Zákazník nemá kontaktní e-mail. Vyplňte ho ve formuláři.");
   }
+
+  const { vykaz, polozky } = await sendVykaz(vykazId, email);
 
   await sendVykazApprovalEmail({
     vykaz,
