@@ -3,7 +3,7 @@ import type { OdvedenaPrace } from "@/lib/types";
 
 export async function listPrace(filters?: {
   zakaznikIds?: string[];
-  projektIds?: string[];
+  projektNazvy?: string[];
   mesic?: string;
   pracovnikIds?: string[];
   stavFakturace?: string[];
@@ -15,9 +15,9 @@ export async function listPrace(filters?: {
     params.push(filters.zakaznikIds);
     clauses.push(`op.zakaznik_id = ANY($${params.length}::uuid[])`);
   }
-  if (filters?.projektIds?.length) {
-    params.push(filters.projektIds);
-    clauses.push(`op.projekt_id = ANY($${params.length}::uuid[])`);
+  if (filters?.projektNazvy?.length) {
+    params.push(filters.projektNazvy);
+    clauses.push(`p.nazev_projektu = ANY($${params.length}::text[])`);
   }
   if (filters?.mesic) {
     if (/^\d{4}$/.test(filters.mesic)) {
@@ -53,11 +53,13 @@ export async function listPrace(filters?: {
             p.jednotka_sazby AS projekt_jednotka_sazby,
             pr.jmeno AS pracovnik_jmeno_krestni,
             pr.prijmeni AS pracovnik_prijmeni,
-            CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno
+            CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno,
+            vpp.vykaz_id
      FROM odvedena_prace op
      JOIN zakaznik z ON z.id = op.zakaznik_id
      JOIN projekt p ON p.id = op.projekt_id
      JOIN pracovnik pr ON pr.id = op.pracovnik_id
+     LEFT JOIN vykaz_prace_polozka vpp ON vpp.odvedena_prace_id = op.id
      ${where}
      ORDER BY op.datum DESC, op.created_at DESC`,
     params.length ? params : undefined,
@@ -76,11 +78,13 @@ export async function getPrace(id: string): Promise<OdvedenaPrace | null> {
             p.jednotka_sazby AS projekt_jednotka_sazby,
             pr.jmeno AS pracovnik_jmeno_krestni,
             pr.prijmeni AS pracovnik_prijmeni,
-            CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno
+            CONCAT(pr.prijmeni, ' ', pr.jmeno) AS pracovnik_jmeno,
+            vpp.vykaz_id
      FROM odvedena_prace op
      JOIN zakaznik z ON z.id = op.zakaznik_id
      JOIN projekt p ON p.id = op.projekt_id
      JOIN pracovnik pr ON pr.id = op.pracovnik_id
+     LEFT JOIN vykaz_prace_polozka vpp ON vpp.odvedena_prace_id = op.id
      WHERE op.id = $1`,
     [id],
   );

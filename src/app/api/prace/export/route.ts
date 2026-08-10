@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   const rows = await listPrace({
     mesic: filters.mesic || currentMesic(),
     pracovnikIds: filters.pracovnikIds,
-    projektIds: filters.projektIds,
+    projektNazvy: filters.projektNazvy,
     zakaznikIds: filters.zakaznikIds,
     stavFakturace: filters.stav,
   });

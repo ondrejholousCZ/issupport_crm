@@ -3,13 +3,14 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { MesicPicker } from "@/components/prace/MesicPicker";
+import { PraceSummaryBar } from "@/components/prace/PraceSummaryBar";
 import { Button } from "@/components/ui/Button";
 import { MultiSelect } from "@/components/ui/MultiSelect";
 import { stavFakturaceLabels } from "@/lib/labels";
 import { parseContentDispositionFilename } from "@/lib/content-disposition";
 import { praceFiltersToQuery, praceFiltersToSearchParams, type PraceFilters } from "@/lib/prace-filters";
 
-type Option = { id: string; label: string; zakaznik_id?: string };
+type Option = { id: string; label: string };
 
 function FilterField({
   label,
@@ -28,40 +29,24 @@ function FilterField({
   );
 }
 
-function pruneProjektIds(
-  projektIds: string[],
-  zakaznikIds: string[],
-  projekty: Option[],
-): string[] {
-  if (zakaznikIds.length === 0) return projektIds;
-  const allowed = new Set(
-    projekty.filter((p) => p.zakaznik_id && zakaznikIds.includes(p.zakaznik_id)).map((p) => p.id),
-  );
-  return projektIds.filter((id) => allowed.has(id));
-}
-
 export function PraceFilters({
   filters,
   pracovnici,
   projekty,
   zakaznici,
+  summary,
 }: {
   filters: PraceFilters;
   pracovnici: Option[];
   projekty: Option[];
   zakaznici: Option[];
+  summary: { totalHours: number; totalCastka: number; count: number };
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
   const [exportLoading, setExportLoading] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
-
-  const filteredProjekty = useMemo(() => {
-    if (filters.zakaznikIds.length === 0) return projekty;
-    const set = new Set(filters.zakaznikIds);
-    return projekty.filter((p) => p.zakaznik_id && set.has(p.zakaznik_id));
-  }, [projekty, filters.zakaznikIds]);
 
   const stavOptions = useMemo(
     () => Object.entries(stavFakturaceLabels).map(([id, label]) => ({ id, label })),
@@ -71,9 +56,6 @@ export function PraceFilters({
   const applyFilters = useCallback(
     (next: Partial<PraceFilters>) => {
       const merged: PraceFilters = { ...filters, ...next };
-      if (next.zakaznikIds !== undefined) {
-        merged.projektIds = pruneProjektIds(merged.projektIds, merged.zakaznikIds, projekty);
-      }
       const extra: Record<string, string> = {};
       const nova = searchParams.get("nova");
       const upravit = searchParams.get("upravit");
@@ -84,7 +66,7 @@ export function PraceFilters({
         router.push(qs ? `/prace?${qs}` : "/prace");
       });
     },
-    [filters, projekty, router, searchParams],
+    [filters, router, searchParams],
   );
 
   async function handleExport() {
@@ -119,7 +101,7 @@ export function PraceFilters({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex flex-wrap items-end gap-x-3 gap-y-3">
         <FilterField label="Období" className="w-[200px]">
           <MesicPicker value={filters.mesic} onChange={(mesic) => applyFilters({ mesic })} />
@@ -145,14 +127,14 @@ export function PraceFilters({
 
         <FilterField label="Projekt" className="w-[220px]">
           <MultiSelect
-            options={filteredProjekty}
-            value={filters.projektIds}
-            onChange={(projektIds) => applyFilters({ projektIds })}
+            options={projekty}
+            value={filters.projektNazvy}
+            onChange={(projektNazvy) => applyFilters({ projektNazvy })}
             emptyLabel="Všechny"
           />
         </FilterField>
 
-        <FilterField label="Stav" className="w-[160px]">
+        <FilterField label="Stav" className="w-[180px]">
           <MultiSelect
             options={stavOptions}
             value={filters.stav}
@@ -171,6 +153,13 @@ export function PraceFilters({
           Export Excel
         </Button>
       </div>
+
+      <PraceSummaryBar
+        totalHours={summary.totalHours}
+        totalCastka={summary.totalCastka}
+        count={summary.count}
+      />
+
       {exportError ? <p className="text-sm text-red-600">{exportError}</p> : null}
     </div>
   );

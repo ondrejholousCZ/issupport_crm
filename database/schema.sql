@@ -204,7 +204,7 @@ CREATE TABLE crmissp.odvedena_prace (
   castka_fakturace      NUMERIC(14,2) CHECK (castka_fakturace >= 0),
   castka_naklady        NUMERIC(14,2) CHECK (castka_naklady >= 0),
   stav_fakturace        VARCHAR(20) NOT NULL DEFAULT 'nefakturovano'
-                          CHECK (stav_fakturace IN ('nefakturovano', 'fakturovano', 'storno')),
+                          CHECK (stav_fakturace IN ('nefakturovano', 'schvaleni_vykazu', 'fakturovano', 'storno')),
   faktura_id            UUID REFERENCES crmissp.faktura(id) ON DELETE SET NULL,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -271,6 +271,37 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_projekt_recalc_prace
   AFTER UPDATE OF hodinova_sazba_fak, jednotka_sazby ON crmissp.projekt
   FOR EACH ROW EXECUTE FUNCTION crmissp.recalc_projekt_prace_castky();
+
+-- ============================================================================
+-- 6b. VÝKAZ PRÁCE (schvalování zákazníkem)
+-- ============================================================================
+CREATE TABLE crmissp.vykaz_prace (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  zakaznik_id       UUID NOT NULL REFERENCES crmissp.zakaznik(id) ON DELETE RESTRICT,
+  obdobi            VARCHAR(7) NOT NULL,
+  stav              VARCHAR(20) NOT NULL DEFAULT 'rozpracovany'
+                      CHECK (stav IN ('rozpracovany', 'odeslany', 'schvaleny')),
+  poznamka_klienta  TEXT,
+  schvaleno_at      TIMESTAMPTZ,
+  odeslano_at       TIMESTAMPTZ,
+  approval_token    VARCHAR(64) UNIQUE,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_vykaz_prace_zakaznik ON crmissp.vykaz_prace(zakaznik_id);
+CREATE INDEX idx_vykaz_prace_obdobi ON crmissp.vykaz_prace(obdobi);
+CREATE INDEX idx_vykaz_prace_token ON crmissp.vykaz_prace(approval_token);
+CREATE TRIGGER trg_vykaz_prace_updated_at
+  BEFORE UPDATE ON crmissp.vykaz_prace
+  FOR EACH ROW EXECUTE FUNCTION crmissp.set_updated_at();
+
+CREATE TABLE crmissp.vykaz_prace_polozka (
+  vykaz_id           UUID NOT NULL REFERENCES crmissp.vykaz_prace(id) ON DELETE CASCADE,
+  odvedena_prace_id  UUID NOT NULL REFERENCES crmissp.odvedena_prace(id) ON DELETE RESTRICT,
+  PRIMARY KEY (vykaz_id, odvedena_prace_id),
+  UNIQUE (odvedena_prace_id)
+);
+CREATE INDEX idx_vykaz_polozka_prace ON crmissp.vykaz_prace_polozka(odvedena_prace_id);
 
 -- ============================================================================
 -- 7. USERS (auth — NextAuth Credentials, oddělené od FaktuMatch)

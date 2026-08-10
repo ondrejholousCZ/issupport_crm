@@ -94,6 +94,13 @@ export async function deleteProjekt(id: string) {
   await query(`DELETE FROM projekt WHERE id = $1`, [id]);
 }
 
+export async function listDistinctProjektNazvy(): Promise<{ id: string; label: string }[]> {
+  const result = await query<{ nazev: string }>(
+    `SELECT DISTINCT nazev_projektu AS nazev FROM projekt ORDER BY nazev_projektu`,
+  );
+  return result.rows.map((r) => ({ id: r.nazev, label: r.nazev }));
+}
+
 export async function listProjektOptions(zakaznikId?: string) {
   const result = await query<{ id: string; label: string; zakaznik_id: string }>(
     zakaznikId

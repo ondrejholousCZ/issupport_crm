@@ -8,6 +8,7 @@ import type {
   SluzbaFrekvence,
   SluzbaStav,
   StavFakturace,
+  VykazStav,
   ZakaznikStav,
 } from "./types";
 
@@ -77,6 +78,13 @@ export const druhCinnostiLabels: Record<DruhCinnosti, string> = {
 
 export const stavFakturaceLabels: Record<StavFakturace, string> = {
   nefakturovano: "Nefakturováno",
+  schvaleni_vykazu: "Schválení výkazu",
   fakturovano: "Fakturováno",
   storno: "Storno",
+};
+
+export const vykazStavLabels: Record<VykazStav, string> = {
+  rozpracovany: "Rozpracovaný",
+  odeslany: "Odeslán ke schválení",
+  schvaleny: "Schválený",
 };

@@ -7,6 +7,7 @@ const navItems = [
   { href: "/zakaznici", label: "Zákazníci" },
   { href: "/projekty", label: "Projekty" },
   { href: "/prace", label: "Odvedená práce" },
+  { href: "/vykazy", label: "Výkazy práce" },
   { href: "/faktury", label: "Faktury" },
   { href: "/sluzby", label: "Služby" },
   { href: "/pracovnici", label: "Pracovníci" },

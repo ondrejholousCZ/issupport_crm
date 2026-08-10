@@ -9,7 +9,8 @@ export type FakturaTyp = "projektova" | "servisni" | "zaloha" | "dobropis";
 export type SluzbaFrekvence = "mesicne" | "kvartalne" | "pololetne" | "rocne" | "vlastni";
 export type SluzbaStav = "aktivni" | "pozastavena" | "ukoncena";
 export type DruhCinnosti = "prace" | "administrativa" | "konzultace" | "cestovne";
-export type StavFakturace = "nefakturovano" | "fakturovano" | "storno";
+export type StavFakturace = "nefakturovano" | "schvaleni_vykazu" | "fakturovano" | "storno";
+export type VykazStav = "rozpracovany" | "odeslany" | "schvaleny";
 
 export interface Zakaznik {
   id: string;
@@ -119,6 +120,23 @@ export interface OdvedenaPrace {
   pracovnik_jmeno?: string;
   pracovnik_jmeno_krestni?: string;
   pracovnik_prijmeni?: string;
+  vykaz_id?: string | null;
+}
+
+export interface VykazPrace {
+  id: string;
+  zakaznik_id: string;
+  obdobi: string;
+  stav: VykazStav;
+  poznamka_klienta: string | null;
+  schvaleno_at: string | null;
+  odeslano_at: string | null;
+  approval_token: string | null;
+  created_at: string;
+  updated_at: string;
+  zakaznik_nazev?: string;
+  zakaznik_email?: string | null;
+  pocet_polozek?: number;
 }
 
 export interface DashboardStats {
