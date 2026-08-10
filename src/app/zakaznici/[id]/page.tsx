@@ -15,13 +15,29 @@ import {
   fakturaStavLabels,
   projektStavLabels,
   sluzbaStavLabels,
+  vykazStavLabels,
   zakaznikStavLabels,
 } from "@/lib/labels";
+import { MESICE_LABELS } from "@/lib/prace-filters";
 import { listFaktury } from "@/lib/queries/faktura";
 import { listPrace } from "@/lib/queries/prace";
 import { listProjekty } from "@/lib/queries/projekt";
 import { listSluzby } from "@/lib/queries/sluzba";
+import { listVykazy } from "@/lib/queries/vykaz-prace";
 import { getZakaznik } from "@/lib/queries/zakaznik";
+import type { VykazStav } from "@/lib/types";
+
+function obdobiLabel(obdobi: string) {
+  const [rok, mesic] = obdobi.split("-");
+  if (!mesic) return obdobi;
+  return `${MESICE_LABELS[Number(mesic) - 1] ?? mesic} ${rok}`;
+}
+
+function vykazTone(stav: VykazStav) {
+  if (stav === "schvaleny") return "green" as const;
+  if (stav === "odeslany") return "blue" as const;
+  return "yellow" as const;
+}
 
 export default async function ZakaznikDetailPage({
   params,
@@ -38,12 +54,18 @@ export default async function ZakaznikDetailPage({
 
   const showEdit = upravit === "1" || upravit === id;
 
-  const [projekty, sluzby, faktury, prace] = await Promise.all([
+  const [projekty, sluzby, faktury, prace, vykazy] = await Promise.all([
     listProjekty(id),
     listSluzby(id),
     listFaktury(id),
     listPrace({ zakaznikIds: [id] }),
+    listVykazy({ zakaznikId: id }),
   ]);
+
+  const adresa =
+    [zakaznik.fakturacni_ulice, zakaznik.fakturacni_mesto, zakaznik.fakturacni_psc]
+      .filter(Boolean)
+      .join(", ") || "—";
 
   return (
     <AppShell
@@ -61,31 +83,30 @@ export default async function ZakaznikDetailPage({
         <UpravitZakaznikModal editRow={showEdit ? zakaznik : null} returnPath={`/zakaznici/${id}`} />
       </Suspense>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <Card className="xl:col-span-1">
+      <div className="space-y-6">
+        <Card>
           <CardHeader title="Údaje" />
-          <CardBody className="space-y-2 text-sm">
-            <p><span className="text-gray-500">IČO:</span> {zakaznik.ico ?? "—"}</p>
-            <p><span className="text-gray-500">Zkratka:</span> {zakaznik.zkratka ?? "—"}</p>
-            <p><span className="text-gray-500">E-mail:</span> {zakaznik.kontaktni_email ?? "—"}</p>
-            <p><span className="text-gray-500">Telefon:</span> {zakaznik.kontaktni_telefon ?? "—"}</p>
-            <p>
-              <span className="text-gray-500">Adresa:</span>{" "}
-              {[zakaznik.fakturacni_ulice, zakaznik.fakturacni_mesto, zakaznik.fakturacni_psc]
-                .filter(Boolean)
-                .join(", ") || "—"}
-            </p>
-            <p>
-              <span className="text-gray-500">Stav:</span>{" "}
-              <StatusBadge label={zakaznikStavLabels[zakaznik.stav]} tone="green" />
-            </p>
-            {zakaznik.postup_fakturace ? (
-              <p><span className="text-gray-500">Postup fakturace:</span> {zakaznik.postup_fakturace}</p>
-            ) : null}
+          <CardBody>
+            <dl className="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+              <InfoItem label="IČO" value={zakaznik.ico ?? "—"} />
+              <InfoItem label="Zkratka" value={zakaznik.zkratka ?? "—"} />
+              <InfoItem label="E-mail" value={zakaznik.kontaktni_email ?? "—"} />
+              <InfoItem label="Telefon" value={zakaznik.kontaktni_telefon ?? "—"} />
+              <InfoItem label="Adresa" value={adresa} />
+              <div>
+                <dt className="text-gray-500">Stav</dt>
+                <dd className="mt-0.5">
+                  <StatusBadge label={zakaznikStavLabels[zakaznik.stav]} tone="green" />
+                </dd>
+              </div>
+              {zakaznik.postup_fakturace ? (
+                <InfoItem label="Postup fakturace" value={zakaznik.postup_fakturace} />
+              ) : null}
+            </dl>
           </CardBody>
         </Card>
 
-        <div className="xl:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Section title="Projekty" href={`/projekty?nova=1&zakaznik=${id}`}>
             {projekty.length === 0 ? (
               <EmptyState message="Žádné projekty." />
@@ -132,7 +153,30 @@ export default async function ZakaznikDetailPage({
             )}
           </Section>
 
-          <Section title="Odvedená práce" href={`/prace?nova=1&zakaznik=${id}`}>
+          <Section title="Výkazy práce" href={`/prace?zakaznik=${id}`} addLabel="Vytvořit z práce">
+            {vykazy.length === 0 ? (
+              <EmptyState message="Žádné výkazy." />
+            ) : (
+              <MiniTable
+                headers={["Období", "Položek", "Stav", "Příjemce", "Odesláno"]}
+                rows={vykazy.map((v) => [
+                  <Link key={v.id} href={`/vykazy?detail=${v.id}`} className="text-primary hover:underline">
+                    {obdobiLabel(v.obdobi)}
+                  </Link>,
+                  v.pocet_polozek ?? 0,
+                  <StatusBadge
+                    key={`${v.id}-stav`}
+                    label={vykazStavLabels[v.stav]}
+                    tone={vykazTone(v.stav)}
+                  />,
+                  v.odeslano_email ?? "—",
+                  v.odeslano_at ? formatDate(v.odeslano_at) : "—",
+                ])}
+              />
+            )}
+          </Section>
+
+          <Section title="Odvedená práce" href={`/prace?nova=1&zakaznik=${id}`} className="lg:col-span-2">
             {prace.length === 0 ? (
               <EmptyState message="Žádné záznamy práce." />
             ) : (
@@ -140,7 +184,7 @@ export default async function ZakaznikDetailPage({
                 headers={["Datum", "Projekt", "Částka"]}
                 rows={prace.slice(0, 10).map((p) => [
                   formatDate(p.datum),
-                  p.projekt_nazev ?? "—",
+                  p.projekt_zakazka ?? p.projekt_nazev ?? "—",
                   formatMoney(p.castka_fakturace),
                 ])}
               />
@@ -152,22 +196,35 @@ export default async function ZakaznikDetailPage({
   );
 }
 
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-gray-500">{label}</dt>
+      <dd className="mt-0.5">{value}</dd>
+    </div>
+  );
+}
+
 function Section({
   title,
   href,
+  addLabel = "+ Přidat",
+  className,
   children,
 }: {
   title: string;
   href: string;
+  addLabel?: string;
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader title={title} />
       <CardBody className="space-y-3">
         {children}
         <Button href={href} variant="secondary">
-          + Přidat
+          {addLabel}
         </Button>
       </CardBody>
     </Card>
