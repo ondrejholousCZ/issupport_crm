@@ -13,7 +13,8 @@
 
 | Proměnná | Popis |
 |---|---|
-| `NEXTAUTH_URL` | `https://<projekt>.vercel.app` (po prvním deployi upřesni) |
+| `APP_URL` | Veřejná URL aplikace pro odkazy v e-mailech, např. `https://crm.issupport.cz` |
+| `NEXTAUTH_URL` | Stejná základní URL jako `APP_URL` (bez `/api/auth/...`) |
 | `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
 | `DATABASE_URL` | `postgresql://crmissp:<heslo>@resvm1.issupport.cz:5432/apireg?options=-c%20search_path%3Dcrmissp` |
 | `DATABASE_SSL` | `false` |
@@ -29,8 +30,10 @@
 Po prvním deployi přidej v Azure Portal:
 
 ```
-https://<projekt>.vercel.app/api/auth/callback/microsoft-entra-id
+https://crm.issupport.cz/api/auth/callback/microsoft-entra-id
 ```
+
+(Případně ponech i původní `https://<projekt>.vercel.app/api/auth/callback/microsoft-entra-id`.)
 
 ## Cron
 

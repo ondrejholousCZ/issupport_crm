@@ -76,7 +76,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (
         path === "/login" ||
         path.startsWith("/api/auth") ||
-        path.startsWith("/api/cron")
+        path.startsWith("/api/cron") ||
+        path.startsWith("/schvaleni")
       ) {
         return true;
       }

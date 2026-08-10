@@ -1,3 +1,4 @@
+import { getAppUrl } from "@/lib/app-url";
 import { buildVykazFilename, buildVykazWorkbook } from "@/lib/export/vykazPrace";
 import { formatCas, formatDate, formatMoney } from "@/lib/format";
 import { MESICE_LABELS } from "@/lib/prace-filters";
@@ -31,7 +32,7 @@ export async function sendVykazApprovalEmail({
   polozky: OdvedenaPrace[];
   toEmail: string;
 }) {
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const baseUrl = getAppUrl();
   const approveUrl = `${baseUrl}/schvaleni/${vykaz.approval_token}`;
 
   let total = 0;
@@ -42,7 +43,7 @@ export async function sendVykazApprovalEmail({
       return `<tr>
         <td style="padding:8px 10px;border-bottom:1px solid #eee;white-space:nowrap">${formatDate(p.datum)}</td>
         <td style="padding:8px 10px;border-bottom:1px solid #eee">${p.projekt_zakazka ?? p.projekt_nazev ?? ""}</td>
-        <td style="padding:8px 10px;border-bottom:1px solid #eee">${p.pracovnik_jmeno ?? ""}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #eee;white-space:nowrap">${p.pracovnik_jmeno ?? ""}</td>
         <td style="padding:8px 10px;border-bottom:1px solid #eee">${p.popis ?? ""}</td>
         <td style="padding:8px 10px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap">${formatCas(p.hodiny, p.minuty)}</td>
         <td style="padding:8px 10px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap">${formatMoney(castka)}</td>
@@ -54,12 +55,20 @@ export async function sendVykazApprovalEmail({
     <div style="font-family:sans-serif;max-width:960px;color:#111">
       <p>Dobrý den,</p>
       <p>zasíláme Vám výkaz práce za období <strong>${obdobiLabel(vykaz.obdobi)}</strong>.</p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;table-layout:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;table-layout:fixed">
+        <colgroup>
+          <col style="width:9%">
+          <col style="width:8%">
+          <col style="width:17%">
+          <col style="width:44%">
+          <col style="width:9%">
+          <col style="width:13%">
+        </colgroup>
         <thead>
           <tr style="background:#f3f4f6">
             <th style="padding:10px;text-align:left;white-space:nowrap">Datum</th>
             <th style="padding:10px;text-align:left">Projekt</th>
-            <th style="padding:10px;text-align:left">Pracovník</th>
+            <th style="padding:10px;text-align:left;white-space:nowrap">Pracovník</th>
             <th style="padding:10px;text-align:left">Popis</th>
             <th style="padding:10px;text-align:right;white-space:nowrap">Čas</th>
             <th style="padding:10px;text-align:right;white-space:nowrap">Částka</th>
