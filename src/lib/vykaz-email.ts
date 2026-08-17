@@ -88,7 +88,6 @@ export async function sendVykazApprovalEmail({
   const html = buildBrandedEmailHtml({
     title: `Výkaz práce pro společnost ${zakaznikNazev}`,
     maxWidth: 832,
-    hideLogo: !logo,
     paragraphs: [
       "Dobrý den,",
       `zasíláme Vám výkaz práce za období ${obdobiLabel(vykaz.obdobi)}. Podrobný přehled najdete v tabulce níže a v příloze ve formátu Excel.`,
@@ -111,7 +110,7 @@ export async function sendVykazApprovalEmail({
     subject: `Výkaz práce ${obdobiLabel(vykaz.obdobi)}`,
     html,
     attachments: [
-      ...(logo ? [logo] : []),
+      logo,
       {
         filename,
         content: attachmentContent,

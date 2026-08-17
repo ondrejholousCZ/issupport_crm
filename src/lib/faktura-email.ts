@@ -51,7 +51,6 @@ export async function sendFakturaEmail({
 
   const html = buildBrandedEmailHtml({
     title: `Faktura společnosti ${zakaznikNazev}`,
-    hideLogo: !logo,
     paragraphs: [
       "Dobrý den,",
       "zasíláme Vám fakturu za poskytnuté služby. Dokument si můžete zobrazit a stáhnout v iDokladu.",
@@ -69,6 +68,6 @@ export async function sendFakturaEmail({
     to: toEmail,
     subject,
     html,
-    attachments: logo ? [logo] : undefined,
+    attachments: [logo],
   });
 }
