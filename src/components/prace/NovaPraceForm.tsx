@@ -15,11 +15,13 @@ export function NovaPraceForm({
   projekty,
   pracovnici,
   defaultProjekt = "",
+  defaultPracovnik = "",
   onCancel,
 }: {
   projekty: Option[];
   pracovnici: Option[];
   defaultProjekt?: string;
+  defaultPracovnik?: string;
   onCancel: () => void;
 }) {
   return (
@@ -40,6 +42,7 @@ export function NovaPraceForm({
           label="Pracovník"
           name="pracovnik_id"
           required
+          defaultValue={defaultPracovnik}
           options={[
             { value: "", label: "— vyberte —" },
             ...pracovnici.map((p) => ({ value: p.id, label: p.label })),

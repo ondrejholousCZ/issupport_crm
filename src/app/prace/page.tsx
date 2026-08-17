@@ -10,7 +10,7 @@ import { requireSession } from "@/lib/auth/require-session";
 import { parsePraceFilters, praceFiltersToQuery } from "@/lib/prace-filters";
 import { summarizePrace } from "@/lib/prace-summary";
 import { listDistinctProjektZakazky, listProjektOptions, resolveProjektFilterValues } from "@/lib/queries/projekt";
-import { listPracovnikOptions } from "@/lib/queries/pracovnik";
+import { getPracovnikIdByEmail, listPracovnikOptions } from "@/lib/queries/pracovnik";
 import { getPrace, listPrace } from "@/lib/queries/prace";
 import { listRozpracovaneVykazy } from "@/lib/queries/vykaz-prace";
 import { listZakaznikOptions } from "@/lib/queries/zakaznik";
@@ -28,7 +28,8 @@ export default async function PracePage({
     stav?: string;
   }>;
 }) {
-  if (!(await requireSession())) redirect("/login");
+  const session = await requireSession();
+  if (!session) redirect("/login");
   const params = await searchParams;
   const rawFilters = parsePraceFilters(params);
   const projektZakazky = await resolveProjektFilterValues(rawFilters.projektZakazky);
@@ -44,7 +45,7 @@ export default async function PracePage({
   const editRow = params.upravit ? await getPrace(params.upravit) : null;
   if (params.upravit && !editRow) notFound();
 
-  const [rows, projektyZakazky, pracovnici, zakaznici, editProjekty, rozpracovaneVykazy, projektyProModal] =
+  const [rows, projektyZakazky, pracovnici, zakaznici, editProjekty, rozpracovaneVykazy, projektyProModal, defaultPracovnik] =
     await Promise.all([
       listPrace({
         mesic: filters.mesic,
@@ -59,6 +60,7 @@ export default async function PracePage({
       editRow ? listProjektOptions(editRow.zakaznik_id) : Promise.resolve([]),
       listRozpracovaneVykazy(),
       listProjektOptions(),
+      session ? getPracovnikIdByEmail(session.email) : Promise.resolve(null),
     ]);
 
   const filterQuery = praceFiltersToQuery(filters);
@@ -74,6 +76,7 @@ export default async function PracePage({
           pracovnici={pracovnici}
           defaultOpen={params.nova === "1"}
           defaultProjekt={params.projekt?.split(",")[0] ?? ""}
+          defaultPracovnik={defaultPracovnik ?? ""}
         />
       }
     >

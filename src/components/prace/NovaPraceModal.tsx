@@ -13,11 +13,13 @@ export function NovaPraceModalTrigger({
   pracovnici,
   defaultOpen = false,
   defaultProjekt = "",
+  defaultPracovnik = "",
 }: {
   projekty: Option[];
   pracovnici: Option[];
   defaultOpen?: boolean;
   defaultProjekt?: string;
+  defaultPracovnik?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -54,6 +56,7 @@ export function NovaPraceModalTrigger({
           projekty={projekty}
           pracovnici={pracovnici}
           defaultProjekt={defaultProjekt}
+          defaultPracovnik={defaultPracovnik}
           onCancel={close}
         />
       </DraggableModal>

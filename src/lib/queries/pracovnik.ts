@@ -79,3 +79,14 @@ export async function listPracovnikOptions() {
   );
   return result.rows;
 }
+
+export async function getPracovnikIdByEmail(email: string): Promise<string | null> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return null;
+
+  const result = await query<{ id: string }>(
+    `SELECT id FROM pracovnik WHERE lower(email) = $1 LIMIT 1`,
+    [normalized],
+  );
+  return result.rows[0]?.id ?? null;
+}
