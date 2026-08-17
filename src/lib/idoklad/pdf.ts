@@ -1,7 +1,14 @@
 import { idokladDownload } from "@/lib/idoklad/client";
 
+/** GetPdf je dostupné jen v API v2 (v3 vrací UnsupportedApiVersion). */
+const IDOKLAD_V2_API_BASE = "https://api.idoklad.cz/v2";
+
 function extractPdfBuffer(payload: unknown): Buffer | null {
+  if (typeof payload === "string" && payload.length > 0) {
+    return Buffer.from(payload, "base64");
+  }
   if (!payload || typeof payload !== "object") return null;
+
   const data = (payload as { Data?: unknown }).Data;
   if (typeof data === "string" && data.length > 0) {
     return Buffer.from(data, "base64");
@@ -18,24 +25,21 @@ function extractPdfBuffer(payload: unknown): Buffer | null {
   return null;
 }
 
-/** Stáhne PDF vydané faktury z iDokladu (endpoint GetPdf / Report). */
+/** Stáhne PDF vydané faktury z iDokladu (API v2 /GetPdf). */
 export async function downloadIssuedInvoicePdf(id: number): Promise<Buffer> {
-  const paths = [`IssuedInvoices/${id}/GetPdf`, `IssuedInvoices/${id}/Report`];
-  let lastError = "PDF faktury se nepodařilo stáhnout z iDokladu.";
+  const url = `${IDOKLAD_V2_API_BASE}/IssuedInvoices/${id}/GetPdf`;
+  const { buffer, contentType, parsedJson } = await idokladDownload(url);
 
-  for (const path of paths) {
-    try {
-      const { buffer, contentType, parsedJson } = await idokladDownload(path);
-      if (contentType.includes("application/pdf") || buffer.slice(0, 4).toString() === "%PDF") {
-        return buffer;
-      }
-      const fromJson = extractPdfBuffer(parsedJson);
-      if (fromJson) return fromJson;
-      lastError = `iDoklad ${path} nevrátil PDF (${contentType || "unknown"}).`;
-    } catch (err) {
-      lastError = err instanceof Error ? err.message : lastError;
-    }
+  if (contentType.includes("application/pdf") || buffer.slice(0, 4).toString() === "%PDF") {
+    return buffer;
   }
 
-  throw new Error(lastError);
+  const fromJson = extractPdfBuffer(parsedJson);
+  if (fromJson && fromJson.slice(0, 4).toString() === "%PDF") {
+    return fromJson;
+  }
+
+  throw new Error(
+    `iDoklad GetPdf nevrátil PDF pro fakturu ${id} (${contentType || "unknown"}).`,
+  );
 }
