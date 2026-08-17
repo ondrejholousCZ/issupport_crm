@@ -1,4 +1,4 @@
-import { EMAIL_LOGO_CONTENT_ID } from "@/lib/email/logo-inline";
+import { EMAIL_LOGO_CONTENT_ID, EMAIL_LOGO_DISPLAY_PX } from "@/lib/email/logo-inline";
 
 export const COMPANY_NAME = "IS Support s. r. o.";
 
@@ -26,6 +26,7 @@ export function buildBrandedEmailHtml(input: {
 }): string {
   const maxWidth = input.maxWidth ?? 640;
   const logoSrc = `cid:${EMAIL_LOGO_CONTENT_ID}`;
+  const logoPx = EMAIL_LOGO_DISPLAY_PX;
   const showLogo = !input.hideLogo;
 
   const detailsHtml =
@@ -61,8 +62,8 @@ ${input.details
       <tr>
         ${
           showLogo
-            ? `<td style="padding-right:12px;vertical-align:middle">
-          <img src="${escapeAttr(logoSrc)}" width="40" height="40" alt="${escapeAttr(COMPANY_NAME)}" style="display:block;border:0" />
+            ? `<td style="width:${logoPx}px;padding-right:12px;vertical-align:middle;line-height:0">
+          <img src="${escapeAttr(logoSrc)}" width="${logoPx}" height="${logoPx}" alt="${escapeAttr(COMPANY_NAME)}" style="display:block;border:0;outline:none;text-decoration:none;width:${logoPx}px;height:${logoPx}px;max-width:${logoPx}px;max-height:${logoPx}px" />
         </td>`
             : ""
         }

@@ -1,7 +1,12 @@
-import { EMAIL_LOGO_BASE64, EMAIL_LOGO_MIME } from "@/lib/email/logo-data";
+import {
+  EMAIL_LOGO_BASE64,
+  EMAIL_LOGO_DISPLAY_PX,
+  EMAIL_LOGO_MIME,
+} from "@/lib/email/logo-data";
 import type { EmailAttachment } from "@/lib/sendgrid";
 
 export const EMAIL_LOGO_CONTENT_ID = "issp-logo";
+export { EMAIL_LOGO_DISPLAY_PX };
 
 /** Inline logo pro e-maily — vložené v bundle, funguje i na Vercelu. */
 export function getEmailLogoInlineAttachment(): EmailAttachment {
