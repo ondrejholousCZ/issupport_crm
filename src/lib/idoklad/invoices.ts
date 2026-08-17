@@ -64,13 +64,16 @@ export async function createIssuedInvoice(
   input: CreateIdokladInvoiceInput,
 ): Promise<IdokladIssuedInvoice> {
   const { numericSequenceId, nextDocumentSerialNumber } = await getDefaultIssuedInvoiceSequence();
+  if (!numericSequenceId || !nextDocumentSerialNumber) {
+    throw new Error("iDoklad: nelze určit číselnou řadu faktury.");
+  }
 
   const payload = {
     PartnerId: input.partnerId,
     CurrencyId: input.currencyId ?? 1,
     PaymentOptionId: input.paymentOptionId ?? 1,
     NumericSequenceId: numericSequenceId,
-    DocumentSerialNumber: nextDocumentSerialNumber,
+    DocumentSerialNumber: String(nextDocumentSerialNumber),
     DateOfIssue: input.dateOfIssue,
     DateOfMaturity: input.dateOfMaturity,
     DateOfTaxing: input.dateOfTaxing,
