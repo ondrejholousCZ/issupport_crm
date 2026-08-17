@@ -3,6 +3,8 @@ import "server-only";
 import {
   FileSASPermissions,
   generateFileSASQueryParameters,
+  ShareClient,
+  ShareDirectoryClient,
   ShareServiceClient,
   StorageSharedKeyCredential,
 } from "@azure/storage-file-share";
@@ -18,6 +20,38 @@ type StorageConfig = {
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
+}
+
+function readEnv(...keys: string[]): string | undefined {
+  for (const key of keys) {
+    const value = process.env[key]?.trim();
+    if (value) return value;
+  }
+  return undefined;
+}
+
+function validateFileEndpoint(endpoint: string): void {
+  if (endpoint.includes(".blob.")) {
+    throw new Error(
+      "Azure endpoint směřuje na Blob storage (.blob.core.windows.net), ale FaktuMatch používá File share. " +
+        "Ve Vercelu smažte AZURE_STORAGE_FILE_ENDPOINT (nebo nastavte https://<account>.file.core.windows.net) " +
+        "a také AZURE_STORAGE_CONTAINER — ten se u file share nepoužívá.",
+    );
+  }
+  if (!endpoint.includes(".file.")) {
+    throw new Error(
+      `Neplatný File endpoint „${endpoint}". Očekává se https://<account>.file.core.windows.net`,
+    );
+  }
+}
+
+function buildFileEndpoint(account: string): string {
+  const custom = readEnv("AZURE_STORAGE_FILE_ENDPOINT");
+  if (custom) {
+    validateFileEndpoint(custom);
+    return trimTrailingSlash(custom);
+  }
+  return `https://${account}.file.core.windows.net`;
 }
 
 function parseConnectionString(connectionString: string, shareName: string): StorageConfig {
@@ -47,6 +81,8 @@ function parseConnectionString(connectionString: string, shareName: string): Sto
     );
   }
 
+  validateFileEndpoint(fileEndpoint);
+
   return {
     account,
     accountKey,
@@ -56,30 +92,26 @@ function parseConnectionString(connectionString: string, shareName: string): Sto
 }
 
 function getStorageConfig(): StorageConfig {
-  const shareName = process.env.AZURE_STORAGE_FILE_SHARE?.trim() || "faktury";
-  const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING?.trim();
+  const shareName = readEnv("AZURE_STORAGE_FILE_SHARE", "AZURE_FILES_SHARE") || "faktury";
+
+  // Stejné proměnné jako ve FaktuMatchu (fakturacni_asistent) — aliasy pro Vercel.
+  const account = readEnv("AZURE_STORAGE_ACCOUNT", "AZURE_FILES_ACCOUNT");
+  const accountKey = readEnv("AZURE_STORAGE_ACCESS_KEY", "AZURE_FILES_KEY");
+
+  if (account && accountKey) {
+    const fileEndpoint = buildFileEndpoint(account);
+    return { account, accountKey, fileEndpoint, shareName };
+  }
+
+  const connectionString = readEnv("AZURE_STORAGE_CONNECTION_STRING");
   if (connectionString) {
     return parseConnectionString(connectionString, shareName);
   }
 
-  const account = process.env.AZURE_STORAGE_ACCOUNT?.trim();
-  const accountKey = process.env.AZURE_STORAGE_ACCESS_KEY?.trim();
-  const fileEndpoint =
-    process.env.AZURE_STORAGE_FILE_ENDPOINT?.trim() ||
-    (account ? `https://${account}.file.core.windows.net` : "");
-
-  if (!account || !accountKey || !fileEndpoint) {
-    throw new Error(
-      "Azure Storage není nakonfigurován. Nastavte AZURE_STORAGE_CONNECTION_STRING, nebo AZURE_STORAGE_ACCOUNT + AZURE_STORAGE_ACCESS_KEY (+ volitelně AZURE_STORAGE_FILE_ENDPOINT).",
-    );
-  }
-
-  return {
-    account,
-    accountKey,
-    fileEndpoint: trimTrailingSlash(fileEndpoint),
-    shareName,
-  };
+  throw new Error(
+    "Azure File Storage není nakonfigurován. Nastavte AZURE_STORAGE_ACCOUNT + AZURE_STORAGE_ACCESS_KEY " +
+      "(nebo AZURE_FILES_ACCOUNT + AZURE_FILES_KEY jako ve FaktuMatchu), případně AZURE_STORAGE_CONNECTION_STRING.",
+  );
 }
 
 function getShareServiceClient(config: StorageConfig): ShareServiceClient {
@@ -91,11 +123,25 @@ function wrapStorageError(err: unknown, config: StorageConfig): Error {
   const message = err instanceof Error ? err.message : String(err);
   if (message.includes("ENOTFOUND") || message.includes("getaddrinfo")) {
     return new Error(
-      `Azure File Storage „${config.account}/${config.shareName}“ není z Vercelu dostupný (DNS: ${config.fileEndpoint}). ` +
-        "Ověřte File endpoint v Azure Portal a povolený veřejný přístup (Networking → Public network access).",
+      `Azure File Storage „${config.account}/${config.shareName}" není dostupný (DNS: ${config.fileEndpoint}). ` +
+        "Ověřte ve Vercelu: AccountName=pgrisspfaktumatch, endpoint .file.core.windows.net (ne .blob.), " +
+        "Networking → Public network access = Enabled.",
     );
   }
   return err instanceof Error ? err : new Error(message);
+}
+
+async function ensureDirectoryTree(share: ShareClient, filePath: string): Promise<void> {
+  const parts = filePath.replace(/^\/+/, "").split("/");
+  parts.pop();
+  if (parts.length === 0) return;
+
+  let current: ShareDirectoryClient = share.rootDirectoryClient;
+  for (const part of parts) {
+    const next = current.getDirectoryClient(part);
+    await next.createIfNotExists();
+    current = next;
+  }
 }
 
 /** Složka YYYYMM podle měsíce vystavení faktury (srpen 2026 → 202608). */
@@ -149,27 +195,14 @@ export function buildFakturaBlobPath(input: {
   return buildFakturaBlobTarget(input).path;
 }
 
-function parseFilePath(filePath: string): { directory: string; fileName: string } {
-  const slash = filePath.indexOf("/");
-  if (slash <= 0 || slash === filePath.length - 1) {
-    throw new Error(`Neplatná cesta k souboru ve file share: ${filePath}`);
-  }
-  return {
-    directory: filePath.slice(0, slash),
-    fileName: filePath.slice(slash + 1),
-  };
-}
-
 export async function uploadFakturaPdf(filePath: string, pdf: Buffer): Promise<void> {
   const config = getStorageConfig();
-  const { directory, fileName } = parseFilePath(filePath);
+  const normalized = filePath.replace(/^\/+/, "");
 
   try {
     const shareClient = getShareServiceClient(config).getShareClient(config.shareName);
-    const directoryClient = shareClient.getDirectoryClient(directory);
-    await directoryClient.createIfNotExists();
-
-    const fileClient = directoryClient.getFileClient(fileName);
+    await ensureDirectoryTree(shareClient, normalized);
+    const fileClient = shareClient.rootDirectoryClient.getFileClient(normalized);
     await fileClient.create(pdf.length, {
       fileHttpHeaders: { fileContentType: "application/pdf" },
     });
@@ -186,10 +219,11 @@ export function getFakturaBlobReadUrl(filePath: string): string {
   const expiresOn = new Date();
   expiresOn.setFullYear(expiresOn.getFullYear() + SAS_VALID_YEARS);
 
+  const normalized = filePath.replace(/^\/+/, "");
   const sas = generateFileSASQueryParameters(
     {
       shareName: config.shareName,
-      filePath,
+      filePath: normalized,
       permissions: FileSASPermissions.parse("r"),
       startsOn: new Date(Date.now() - 60_000),
       expiresOn,
@@ -197,10 +231,27 @@ export function getFakturaBlobReadUrl(filePath: string): string {
     credential,
   ).toString();
 
-  const encodedPath = filePath
+  const encodedPath = normalized
     .split("/")
     .map((part) => encodeURIComponent(part))
     .join("/");
 
   return `${config.fileEndpoint}/${config.shareName}/${encodedPath}?${sas}`;
+}
+
+/** Ověření připojení ke share — pro diagnostiku. */
+export async function testFakturaStorageConnection(): Promise<{ ok: boolean; message: string }> {
+  try {
+    const config = getStorageConfig();
+    const share = getShareServiceClient(config).getShareClient(config.shareName);
+    const props = await share.getProperties();
+    return {
+      ok: true,
+      message: `Připojeno ke share „${config.shareName}" na ${config.fileEndpoint} (quota ${props.quota ?? "—"} GB)`,
+    };
+  } catch (err) {
+    const config = getStorageConfig();
+    const wrapped = wrapStorageError(err, config);
+    return { ok: false, message: wrapped.message };
+  }
 }
