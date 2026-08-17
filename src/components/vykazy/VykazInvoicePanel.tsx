@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { normalizeIdokladInvoiceUrl } from "@/lib/idoklad/invoices";
 import { issueVykazToIdokladAction } from "@/lib/actions/faktura-vykaz";
 import { SubmitButton } from "@/components/ui/SubmitButton";
