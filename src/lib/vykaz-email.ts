@@ -56,12 +56,12 @@ export async function sendVykazApprovalEmail({
   const tableHtml = `
     <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0;table-layout:fixed">
       <colgroup>
+        <col style="width:10%">
         <col style="width:9%">
+        <col style="width:14%">
+        <col style="width:48%">
         <col style="width:8%">
-        <col style="width:17%">
-        <col style="width:44%">
-        <col style="width:9%">
-        <col style="width:13%">
+        <col style="width:11%">
       </colgroup>
       <thead>
         <tr style="background:#f3f4f6">
@@ -83,7 +83,8 @@ export async function sendVykazApprovalEmail({
     </table>`;
 
   const html = buildBrandedEmailHtml({
-    title: `Výkaz práce společnosti ${zakaznikNazev}`,
+    title: `Výkaz práce pro společnost ${zakaznikNazev}`,
+    maxWidth: 832,
     paragraphs: [
       "Dobrý den,",
       `zasíláme Vám výkaz práce za období ${obdobiLabel(vykaz.obdobi)}. Podrobný přehled najdete v tabulce níže a v příloze ve formátu Excel.`,
@@ -98,7 +99,7 @@ export async function sendVykazApprovalEmail({
   });
 
   const workbook = await buildVykazWorkbook(polozky);
-  const filename = buildVykazFilename(polozky, vykaz.obdobi);
+  const filename = buildVykazFilename(polozky, vykaz.obdobi, true);
   const attachmentContent = Buffer.from(workbook).toString("base64");
 
   await sendEmail({

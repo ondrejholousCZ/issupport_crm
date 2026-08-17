@@ -19,8 +19,11 @@ export function buildBrandedEmailHtml(input: {
   extraHtml?: string;
   cta?: BrandedEmailCta;
   plainLink?: string;
+  /** Výchozí 640px; výkaz práce používá 832px (+30 %). */
+  maxWidth?: number;
 }): string {
   const logoUrl = `${getAppUrl()}/email/logo-issp.png`;
+  const maxWidth = input.maxWidth ?? 640;
 
   const detailsHtml =
     input.details && input.details.length
@@ -50,7 +53,7 @@ ${input.details
   return `<!DOCTYPE html>
 <html lang="cs">
 <body style="margin:0;padding:0;background:#fff;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#111">
-  <div style="max-width:640px;margin:0 auto;padding:32px 24px">
+  <div style="max-width:${maxWidth}px;margin:0 auto;padding:32px 24px">
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px">
       <tr>
         <td style="padding-right:12px;vertical-align:middle">

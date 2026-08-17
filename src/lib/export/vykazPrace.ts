@@ -17,7 +17,17 @@ function parseDatum(value: string | Date): Date {
 const FMT_HODINY = "[h]:mm";
 const FMT_CENA = '#,##0.00" Kč"';
 
-export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string): string {
+/** Odstraní diakritiku pro názvy souborů v e-mailu (SendGrid vyžaduje ASCII). */
+function asciiFilenamePart(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[^\w.-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "");
+}
+
+export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string, forEmail = false): string {
   const periodPart = /^\d{4}$/.test(mesic) ? mesic : mesic.replace("-", "");
   const pracovnici = new Set(rows.map((r) => r.pracovnik_id));
   const zakaznikZkratky = new Set(
@@ -39,7 +49,12 @@ export function buildVykazFilename(rows: OdvedenaPrace[], mesic: string): string
         ? "mix"
         : "export";
 
-  return `${prefix}_Výkaz_Práce_${periodPart}_${suffix}.xlsx`;
+  const vykazLabel = forEmail ? "Vykaz" : "Výkaz";
+  const praceLabel = forEmail ? "Prace" : "Práce";
+  const safePrefix = forEmail ? asciiFilenamePart(prefix) : prefix;
+  const safeSuffix = forEmail ? asciiFilenamePart(suffix) : suffix;
+
+  return `${safePrefix}_${vykazLabel}_${praceLabel}_${periodPart}_${safeSuffix}.xlsx`;
 }
 
 export async function buildVykazWorkbook(rows: OdvedenaPrace[]): Promise<ExcelJS.Buffer> {
