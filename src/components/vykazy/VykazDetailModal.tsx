@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   deleteVykazAction,
   removePolozkaFromVykazAction,
+  resendVykazEmailAction,
   sendVykazAction,
   unlockVykazAction,
 } from "@/lib/actions/vykaz-prace";
@@ -67,6 +68,7 @@ export function VykazDetailModal({
 
   const summary = summarizePrace(polozky);
   const send = sendVykazAction.bind(null, vykaz.id);
+  const resend = resendVykazEmailAction.bind(null, vykaz.id);
   const unlock = unlockVykazAction.bind(null, vykaz.id);
   const deleteVykaz = deleteVykazAction.bind(null, vykaz.id);
   const editable = vykaz.stav === "rozpracovany";
@@ -177,7 +179,20 @@ export function VykazDetailModal({
           />
         ) : null}
 
-        {vykaz.stav === "odeslany" || vykaz.stav === "schvaleny" ? (
+        {vykaz.stav === "odeslany" ? (
+          <form action={resend} className="space-y-3 border-t border-border pt-4">
+            <FormField
+              label="E-mail příjemce"
+              name="email"
+              type="email"
+              defaultValue={vykaz.odeslano_email ?? vykaz.zakaznik_email ?? ""}
+              hint="Odešle stejný výkaz znovu — odkaz ke schválení zůstane platný."
+            />
+            <SubmitButton>Znovu odeslat e-mail</SubmitButton>
+          </form>
+        ) : null}
+
+        {vykaz.stav === "odeslany" || (vykaz.stav === "schvaleny" && !linkedFaktura) ? (
           <div className="flex flex-wrap gap-2 border-t border-border pt-4">
             <form action={unlock}>
               <SubmitButton variant="secondary">Odemknout / upravit</SubmitButton>

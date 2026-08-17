@@ -13,6 +13,7 @@ import {
   deleteVykaz,
   getVykaz,
   removePolozkaFromVykaz,
+  resendVykazEmail,
   sendVykaz,
   unlockVykaz,
 } from "@/lib/queries/vykaz-prace";
@@ -71,6 +72,36 @@ export async function sendVykazAction(vykazId: string, formData: FormData) {
 
   const { vykaz, polozky } = await sendVykaz(vykazId, email);
 
+  try {
+    await sendVykazApprovalEmail({
+      vykaz,
+      polozky,
+      toEmail: email,
+      zakaznikNazev: vykazBefore.zakaznik_nazev ?? "zákazník",
+    });
+  } catch (err) {
+    await unlockVykaz(vykazId);
+    throw err;
+  }
+
+  revalidatePath("/vykazy");
+  revalidatePath("/prace");
+  redirect(`/vykazy?detail=${vykazId}`);
+}
+
+export async function resendVykazEmailAction(vykazId: string, formData: FormData) {
+  await guard();
+  const toEmail = formOptStr(formData, "email");
+  const vykazBefore = await getVykaz(vykazId);
+  if (!vykazBefore) throw new Error("Výkaz neexistuje.");
+
+  const email = toEmail || vykazBefore.odeslano_email || vykazBefore.zakaznik_email;
+  if (!email) {
+    throw new Error("Vyplňte e-mail příjemce.");
+  }
+
+  const { vykaz, polozky } = await resendVykazEmail(vykazId, email);
+
   await sendVykazApprovalEmail({
     vykaz,
     polozky,
@@ -79,8 +110,7 @@ export async function sendVykazAction(vykazId: string, formData: FormData) {
   });
 
   revalidatePath("/vykazy");
-  revalidatePath("/prace");
-  redirect("/vykazy");
+  redirect(`/vykazy?detail=${vykazId}`);
 }
 
 export async function unlockVykazAction(vykazId: string) {

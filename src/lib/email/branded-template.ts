@@ -21,9 +21,12 @@ export function buildBrandedEmailHtml(input: {
   plainLink?: string;
   /** Výchozí 640px; výkaz práce používá 832px (+30 %). */
   maxWidth?: number;
+  /** Vypne logo v hlavičce (např. když není k dispozici soubor). */
+  hideLogo?: boolean;
 }): string {
   const maxWidth = input.maxWidth ?? 640;
   const logoSrc = `cid:${EMAIL_LOGO_CONTENT_ID}`;
+  const showLogo = !input.hideLogo;
 
   const detailsHtml =
     input.details && input.details.length
@@ -56,9 +59,13 @@ ${input.details
   <div style="max-width:${maxWidth}px;margin:0 auto;padding:32px 24px">
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px">
       <tr>
-        <td style="padding-right:12px;vertical-align:middle">
+        ${
+          showLogo
+            ? `<td style="padding-right:12px;vertical-align:middle">
           <img src="${escapeAttr(logoSrc)}" width="40" height="40" alt="${escapeAttr(COMPANY_NAME)}" style="display:block;border:0" />
-        </td>
+        </td>`
+            : ""
+        }
         <td style="vertical-align:middle;font-size:18px;color:#5e5e5e;font-weight:400">${escapeHtml(COMPANY_NAME)}</td>
       </tr>
     </table>

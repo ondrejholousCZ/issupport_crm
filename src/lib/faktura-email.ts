@@ -47,8 +47,11 @@ export async function sendFakturaEmail({
     details.push({ label: "Datum splatnosti", value: formatDateLong(faktura.datum_splatnosti) });
   }
 
+  const logo = getEmailLogoInlineAttachment();
+
   const html = buildBrandedEmailHtml({
     title: `Faktura společnosti ${zakaznikNazev}`,
+    hideLogo: !logo,
     paragraphs: [
       "Dobrý den,",
       "zasíláme Vám fakturu za poskytnuté služby. Dokument si můžete zobrazit a stáhnout v iDokladu.",
@@ -66,6 +69,6 @@ export async function sendFakturaEmail({
     to: toEmail,
     subject,
     html,
-    attachments: [getEmailLogoInlineAttachment()],
+    attachments: logo ? [logo] : undefined,
   });
 }

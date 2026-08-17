@@ -225,6 +225,26 @@ export async function sendVykaz(vykazId: string, odeslanoEmail: string) {
   return { token, vykaz: updated, polozky };
 }
 
+export async function resendVykazEmail(vykazId: string, odeslanoEmail: string) {
+  const vykaz = await getVykaz(vykazId);
+  if (!vykaz) throw new Error("Výkaz neexistuje.");
+  if (vykaz.stav !== "odeslany") throw new Error("Znovu odeslat lze jen odeslaný výkaz.");
+  if (!vykaz.approval_token) throw new Error("Výkaz nemá platný odkaz ke schválení — nejdříve ho odemkněte a odešlete znovu.");
+
+  const polozky = await getVykazPolozky(vykazId);
+  if (polozky.length === 0) throw new Error("Výkaz nemá žádné položky.");
+
+  await query(
+    `UPDATE vykaz_prace SET odeslano_at = now(), odeslano_email = $2 WHERE id = $1`,
+    [vykazId, odeslanoEmail],
+  );
+
+  const updated = await getVykaz(vykazId);
+  if (!updated) throw new Error("Výkaz neexistuje.");
+
+  return { vykaz: updated, polozky };
+}
+
 export async function approveVykaz(token: string, poznamka?: string) {
   const vykaz = await getVykazByToken(token);
   if (!vykaz) throw new Error("Výkaz nenalezen.");
@@ -250,6 +270,9 @@ export async function unlockVykaz(vykazId: string) {
   const vykaz = await getVykaz(vykazId);
   if (!vykaz) throw new Error("Výkaz neexistuje.");
   if (vykaz.stav === "rozpracovany") return;
+  if (vykaz.faktura_id) {
+    throw new Error("Výkaz už má vystavenou fakturu — nelze odemknout.");
+  }
 
   const polozky = await getVykazPolozky(vykazId);
   const ids = polozky.map((p) => p.id);
