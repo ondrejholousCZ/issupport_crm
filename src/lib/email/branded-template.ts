@@ -1,4 +1,4 @@
-import { getAppUrl } from "@/lib/app-url";
+import { EMAIL_LOGO_CONTENT_ID } from "@/lib/email/logo-inline";
 
 export const COMPANY_NAME = "IS Support s. r. o.";
 
@@ -22,8 +22,8 @@ export function buildBrandedEmailHtml(input: {
   /** Výchozí 640px; výkaz práce používá 832px (+30 %). */
   maxWidth?: number;
 }): string {
-  const logoUrl = `${getAppUrl()}/email/logo-issp.png`;
   const maxWidth = input.maxWidth ?? 640;
+  const logoSrc = `cid:${EMAIL_LOGO_CONTENT_ID}`;
 
   const detailsHtml =
     input.details && input.details.length
@@ -57,7 +57,7 @@ ${input.details
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px">
       <tr>
         <td style="padding-right:12px;vertical-align:middle">
-          <img src="${escapeAttr(logoUrl)}" width="40" height="40" alt="${escapeAttr(COMPANY_NAME)}" style="display:block;border:0" />
+          <img src="${escapeAttr(logoSrc)}" width="40" height="40" alt="${escapeAttr(COMPANY_NAME)}" style="display:block;border:0" />
         </td>
         <td style="vertical-align:middle;font-size:18px;color:#5e5e5e;font-weight:400">${escapeHtml(COMPANY_NAME)}</td>
       </tr>

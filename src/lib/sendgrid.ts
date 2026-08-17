@@ -4,6 +4,8 @@ export type EmailAttachment = {
   filename: string;
   content: string;
   type: string;
+  disposition?: "attachment" | "inline";
+  contentId?: string;
 };
 
 export async function sendEmail({
@@ -45,7 +47,8 @@ export async function sendEmail({
         content: a.content,
         filename: a.filename,
         type: a.type,
-        disposition: "attachment",
+        disposition: a.disposition ?? "attachment",
+        ...(a.contentId ? { content_id: a.contentId } : {}),
       })),
     }),
   });

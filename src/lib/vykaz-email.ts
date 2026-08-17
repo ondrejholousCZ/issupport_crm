@@ -1,5 +1,6 @@
 import { getAppUrl } from "@/lib/app-url";
 import { buildBrandedEmailHtml } from "@/lib/email/branded-template";
+import { getEmailLogoInlineAttachment } from "@/lib/email/logo-inline";
 import { buildVykazFilename, buildVykazWorkbook } from "@/lib/export/vykazPrace";
 import { formatCas, formatDate, formatMoney } from "@/lib/format";
 import { MESICE_LABELS } from "@/lib/prace-filters";
@@ -107,6 +108,7 @@ export async function sendVykazApprovalEmail({
     subject: `Výkaz práce ${obdobiLabel(vykaz.obdobi)}`,
     html,
     attachments: [
+      getEmailLogoInlineAttachment(),
       {
         filename,
         content: attachmentContent,

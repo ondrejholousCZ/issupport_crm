@@ -1,4 +1,5 @@
 import { buildBrandedEmailHtml } from "@/lib/email/branded-template";
+import { getEmailLogoInlineAttachment } from "@/lib/email/logo-inline";
 import { normalizeIdokladInvoiceUrl } from "@/lib/idoklad/invoices";
 import { formatDateLong, formatMoney } from "@/lib/format";
 import { MESICE_LABELS } from "@/lib/prace-filters";
@@ -61,5 +62,10 @@ export async function sendFakturaEmail({
     ? `Faktura ${faktura.cislo_faktury}`
     : "Faktura IS Support s. r. o.";
 
-  await sendEmail({ to: toEmail, subject, html });
+  await sendEmail({
+    to: toEmail,
+    subject,
+    html,
+    attachments: [getEmailLogoInlineAttachment()],
+  });
 }

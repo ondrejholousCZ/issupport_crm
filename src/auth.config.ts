@@ -20,7 +20,8 @@ export const authConfig = {
         path === "/login" ||
         path.startsWith("/api/auth") ||
         path.startsWith("/api/cron") ||
-        path.startsWith("/schvaleni")
+        path.startsWith("/schvaleni") ||
+        path.startsWith("/email")
       ) {
         return true;
       }
