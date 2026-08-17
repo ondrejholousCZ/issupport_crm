@@ -1,4 +1,5 @@
 import { IDOKLAD_APP_URL, idokladRequest, type IdokladItemResponse } from "@/lib/idoklad/client";
+import { getDefaultIssuedInvoiceSequence } from "@/lib/idoklad/numeric-sequences";
 
 export type IdokladInvoiceItem = {
   Name: string;
@@ -62,10 +63,14 @@ export function buildIdokladInvoiceItem(input: {
 export async function createIssuedInvoice(
   input: CreateIdokladInvoiceInput,
 ): Promise<IdokladIssuedInvoice> {
+  const { numericSequenceId, nextDocumentSerialNumber } = await getDefaultIssuedInvoiceSequence();
+
   const payload = {
     PartnerId: input.partnerId,
     CurrencyId: input.currencyId ?? 1,
     PaymentOptionId: input.paymentOptionId ?? 1,
+    NumericSequenceId: numericSequenceId,
+    DocumentSerialNumber: nextDocumentSerialNumber,
     DateOfIssue: input.dateOfIssue,
     DateOfMaturity: input.dateOfMaturity,
     DateOfTaxing: input.dateOfTaxing,

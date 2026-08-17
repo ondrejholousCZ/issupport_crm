@@ -36,6 +36,11 @@ export async function sendEmail({
       from: { email: fromEmail, name: fromName },
       subject,
       content: [{ type: "text/html", value: html }],
+      // Link branding (url1470.issupport.cz) nemá SSL — click tracking by rozbil HTTPS odkazy.
+      tracking_settings: {
+        click_tracking: { enable: false, enable_text: false },
+        open_tracking: { enable: false },
+      },
       attachments: attachments?.map((a) => ({
         content: a.content,
         filename: a.filename,
