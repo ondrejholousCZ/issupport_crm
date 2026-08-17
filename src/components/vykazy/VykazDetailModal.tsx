@@ -39,11 +39,13 @@ export function VykazDetailModal({
   polozky,
   invoiceDraft,
   linkedFaktura,
+  fakturacniEmail = "",
 }: {
   vykaz: VykazPrace | null;
   polozky: OdvedenaPrace[];
   invoiceDraft?: InvoiceDraft | null;
   linkedFaktura?: Faktura | null;
+  fakturacniEmail?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -171,6 +173,7 @@ export function VykazDetailModal({
             vykazId={vykaz.id}
             draft={invoiceDraft ?? null}
             faktura={linkedFaktura ?? null}
+            fakturacniEmail={fakturacniEmail}
           />
         ) : null}
 

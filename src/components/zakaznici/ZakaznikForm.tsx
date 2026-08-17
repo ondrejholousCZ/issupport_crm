@@ -12,6 +12,7 @@ export type ZakaznikFormValues = {
   zkratka?: string;
   stav?: string;
   kontaktni_email?: string;
+  fakturacni_email?: string;
   kontaktni_telefon?: string;
   fakturacni_ulice?: string;
   fakturacni_mesto?: string;
@@ -143,6 +144,13 @@ export function ZakaznikForm({
           name="kontaktni_email"
           type="email"
           defaultValue={defaultValues.kontaktni_email ?? ""}
+        />
+        <FormField
+          label="Fakturační e-mail"
+          name="fakturacni_email"
+          type="email"
+          defaultValue={defaultValues.fakturacni_email ?? ""}
+          hint="Adresa pro odesílání faktur. Pokud je prázdná, použije se kontaktní e-mail."
         />
         <FormField
           label="Telefon"

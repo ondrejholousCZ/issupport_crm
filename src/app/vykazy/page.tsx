@@ -12,6 +12,7 @@ import { vykazStavLabels } from "@/lib/labels";
 import { getFaktura } from "@/lib/queries/faktura";
 import { prepareInvoiceDraftFromVykaz } from "@/lib/queries/faktura-from-vykaz";
 import { getVykaz, getVykazPolozky, listVykazy } from "@/lib/queries/vykaz-prace";
+import { getZakaznik } from "@/lib/queries/zakaznik";
 import type { InvoiceDraft } from "@/lib/faktura-sablona";
 import type { Faktura } from "@/lib/types";
 
@@ -45,6 +46,7 @@ export default async function VykazyPage({
 
   let linkedFaktura: Faktura | null = null;
   let invoiceDraft: InvoiceDraft | null = null;
+  let fakturacniEmail = "";
 
   if (detailVykaz?.faktura_id) {
     linkedFaktura = await getFaktura(detailVykaz.faktura_id);
@@ -56,6 +58,11 @@ export default async function VykazyPage({
     }
   }
 
+  if (detailVykaz) {
+    const zakaznik = await getZakaznik(detailVykaz.zakaznik_id);
+    fakturacniEmail = zakaznik?.fakturacni_email ?? zakaznik?.kontaktni_email ?? "";
+  }
+
   return (
     <AppShell title="Výkazy práce">
       <Suspense fallback={null}>
@@ -64,6 +71,7 @@ export default async function VykazyPage({
           polozky={detailPolozky}
           invoiceDraft={invoiceDraft}
           linkedFaktura={linkedFaktura}
+          fakturacniEmail={fakturacniEmail}
         />
       </Suspense>
 

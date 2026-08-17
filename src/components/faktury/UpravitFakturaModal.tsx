@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { DraggableModal } from "@/components/ui/DraggableModal";
 import { DeleteForm } from "@/components/DeleteForm";
+import { FakturaEmailPanel } from "@/components/faktury/FakturaEmailPanel";
 import { deleteFakturaAction, updateFakturaAction } from "@/lib/actions/faktura";
 import type { Faktura } from "@/lib/types";
 import { FakturaForm } from "./FakturaForm";
@@ -71,6 +72,12 @@ export function UpravitFakturaModal({
           idoklad_url: editRow.idoklad_url ?? "",
         }}
       />
+      {(editRow.idoklad_id || editRow.idoklad_url) && editRow.stav !== "rozpracovana" ? (
+        <FakturaEmailPanel
+          faktura={editRow}
+          defaultEmail={editRow.zakaznik_fakturacni_email ?? editRow.zakaznik_kontaktni_email ?? ""}
+        />
+      ) : null}
       <div className="mt-4 border-t border-border pt-4">
         <DeleteForm action={deleteFakturaAction.bind(null, editRow.id)} />
       </div>

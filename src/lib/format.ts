@@ -36,6 +36,22 @@ export function formatDate(value: string | Date | null | undefined): string {
   return czDate.format(d);
 }
 
+const czDateLong = new Intl.DateTimeFormat("cs-CZ", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+/** Datum ve stylu „pondělí 1. června 2026“ pro e-maily. */
+export function formatDateLong(value: string | Date | null | undefined): string {
+  if (!value) return "—";
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  const formatted = czDateLong.format(d);
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
+
 export function formatMoney(value: string | number | null | undefined, mena = "CZK"): string {
   if (value === null || value === undefined || value === "") return "—";
   const num = typeof value === "string" ? Number(value) : value;

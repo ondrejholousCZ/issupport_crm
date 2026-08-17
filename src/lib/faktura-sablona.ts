@@ -59,11 +59,11 @@ function obdobiParts(obdobi: string): { mesic: string; rok: string } {
   return { rok, mesic: mesicNum ?? "" };
 }
 
-function lastDayOfObdobi(obdobi: string): string {
+function lastDayOfPreviousMonthForObdobi(obdobi: string): string {
   const [rokStr, mesicStr] = obdobi.split("-");
   const rok = Number(rokStr);
   const mesic = Number(mesicStr);
-  const d = new Date(rok, mesic, 0);
+  const d = new Date(rok, mesic - 1, 0);
   return toIsoDate(d);
 }
 
@@ -79,7 +79,8 @@ function addDays(iso: string, days: number): string {
 
 export function computeInvoiceDates(obdobi: string, sablona: Pick<FakturacniSablona, "splatnost_dnu" | "duzp_typ">) {
   const today = toIsoDate(new Date());
-  const duzp = sablona.duzp_typ === "konec_obdobi" ? lastDayOfObdobi(obdobi) : today;
+  const duzp =
+    sablona.duzp_typ === "konec_obdobi" ? lastDayOfPreviousMonthForObdobi(obdobi) : today;
   const datumVystaveni = today;
   const datumSplatnosti = addDays(duzp, sablona.splatnost_dnu);
   return { datumVystaveni, datumDuzp: duzp, datumSplatnosti };

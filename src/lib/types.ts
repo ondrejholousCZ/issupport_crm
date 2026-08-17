@@ -20,6 +20,7 @@ export interface Zakaznik {
   nazev: string;
   zkratka: string | null;
   kontaktni_email: string | null;
+  fakturacni_email: string | null;
   kontaktni_telefon: string | null;
   fakturacni_ulice: string | null;
   fakturacni_mesto: string | null;
@@ -79,9 +80,13 @@ export interface Faktura {
   datum_duzp: string | null;
   idoklad_id: number | null;
   idoklad_url: string | null;
+  odeslano_email: string | null;
+  odeslano_at: string | null;
   created_at: string;
   updated_at: string;
   zakaznik_nazev?: string;
+  zakaznik_fakturacni_email?: string | null;
+  zakaznik_kontaktni_email?: string | null;
   projekt_nazev?: string | null;
   sluzba_nazev?: string | null;
 }

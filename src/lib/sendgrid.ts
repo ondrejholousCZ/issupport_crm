@@ -19,7 +19,7 @@ export async function sendEmail({
 }) {
   const apiKey = process.env.SENDGRID_API_KEY;
   const fromEmail = process.env.SENDGRID_FROM_EMAIL;
-  const fromName = process.env.SENDGRID_FROM_NAME ?? "ISSP";
+  const fromName = process.env.SENDGRID_FROM_NAME ?? "IS Support s. r. o.";
 
   if (!apiKey || !fromEmail) {
     throw new Error("SendGrid není nakonfigurován (SENDGRID_API_KEY, SENDGRID_FROM_EMAIL).");

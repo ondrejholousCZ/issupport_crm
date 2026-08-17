@@ -3,11 +3,56 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/require-session";
+import { sendFakturaEmail } from "@/lib/faktura-email";
 import { formOptStr, formStr } from "@/lib/form";
-import { createFaktura, deleteFaktura, updateFaktura } from "@/lib/queries/faktura";
+import {
+  createFaktura,
+  deleteFaktura,
+  getFaktura,
+  markFakturaSent,
+  updateFaktura,
+} from "@/lib/queries/faktura";
+import { getVykaz } from "@/lib/queries/vykaz-prace";
+import { getZakaznik } from "@/lib/queries/zakaznik";
 
 async function guard() {
   if (!(await requireSession())) redirect("/login");
+}
+
+export async function sendFakturaEmailAction(fakturaId: string, formData: FormData) {
+  await guard();
+
+  const faktura = await getFaktura(fakturaId);
+  if (!faktura) throw new Error("Faktura neexistuje.");
+
+  const zakaznik = await getZakaznik(faktura.zakaznik_id);
+  if (!zakaznik) throw new Error("Zákazník neexistuje.");
+
+  const toEmail =
+    formOptStr(formData, "email") || zakaznik.fakturacni_email || zakaznik.kontaktni_email;
+  if (!toEmail) {
+    throw new Error("Zákazník nemá fakturační e-mail. Vyplňte ho ve formuláři.");
+  }
+
+  let obdobi: string | null = null;
+  if (faktura.vykaz_id) {
+    const vykaz = await getVykaz(faktura.vykaz_id);
+    obdobi = vykaz?.obdobi ?? null;
+  }
+
+  await sendFakturaEmail({
+    faktura,
+    toEmail,
+    zakaznikNazev: zakaznik.nazev,
+    obdobi,
+  });
+
+  await markFakturaSent(fakturaId, toEmail);
+
+  revalidatePath("/faktury");
+  revalidatePath("/vykazy");
+  const returnTo = formOptStr(formData, "returnTo");
+  redirect(returnTo || `/faktury?upravit=${fakturaId}`);
 }
 
 function parse(formData: FormData) {

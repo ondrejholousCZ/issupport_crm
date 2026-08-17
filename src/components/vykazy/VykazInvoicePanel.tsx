@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FakturaEmailPanel } from "@/components/faktury/FakturaEmailPanel";
 import { normalizeIdokladInvoiceUrl } from "@/lib/idoklad/invoices";
 import { issueVykazToIdokladAction } from "@/lib/actions/faktura-vykaz";
 import { SubmitButton } from "@/components/ui/SubmitButton";
@@ -13,10 +14,12 @@ export function VykazInvoicePanel({
   vykazId,
   draft,
   faktura,
+  fakturacniEmail,
 }: {
   vykazId: string;
   draft: InvoiceDraft | null;
   faktura: Faktura | null;
+  fakturacniEmail?: string;
 }) {
   if (faktura) {
     const idokladUrl = normalizeIdokladInvoiceUrl(faktura.idoklad_url, faktura.idoklad_id);
@@ -38,6 +41,11 @@ export function VykazInvoicePanel({
             </a>
           ) : null}
         </div>
+        <FakturaEmailPanel
+          faktura={faktura}
+          defaultEmail={fakturacniEmail ?? faktura.zakaznik_fakturacni_email ?? faktura.zakaznik_kontaktni_email ?? ""}
+          returnTo={`/vykazy?detail=${vykazId}`}
+        />
       </div>
     );
   }

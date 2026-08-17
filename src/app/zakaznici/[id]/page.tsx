@@ -90,7 +90,8 @@ export default async function ZakaznikDetailPage({
             <dl className="flex flex-wrap gap-x-8 gap-y-3 text-sm">
               <InfoItem label="IČO" value={zakaznik.ico ?? "—"} />
               <InfoItem label="Zkratka" value={zakaznik.zkratka ?? "—"} />
-              <InfoItem label="E-mail" value={zakaznik.kontaktni_email ?? "—"} />
+              <InfoItem label="Kontaktní e-mail" value={zakaznik.kontaktni_email ?? "—"} />
+              <InfoItem label="Fakturační e-mail" value={zakaznik.fakturacni_email ?? "—"} />
               <InfoItem label="Telefon" value={zakaznik.kontaktni_telefon ?? "—"} />
               <InfoItem label="Adresa" value={adresa} />
               <div>

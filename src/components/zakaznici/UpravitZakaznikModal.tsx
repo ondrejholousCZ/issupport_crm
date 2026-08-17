@@ -51,6 +51,7 @@ export function UpravitZakaznikModal({
           zkratka: editRow.zkratka ?? "",
           stav: editRow.stav,
           kontaktni_email: editRow.kontaktni_email ?? "",
+          fakturacni_email: editRow.fakturacni_email ?? "",
           kontaktni_telefon: editRow.kontaktni_telefon ?? "",
           fakturacni_ulice: editRow.fakturacni_ulice ?? "",
           fakturacni_mesto: editRow.fakturacni_mesto ?? "",

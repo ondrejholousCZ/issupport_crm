@@ -1,4 +1,5 @@
 import { getAppUrl } from "@/lib/app-url";
+import { buildBrandedEmailHtml } from "@/lib/email/branded-template";
 import { buildVykazFilename, buildVykazWorkbook } from "@/lib/export/vykazPrace";
 import { formatCas, formatDate, formatMoney } from "@/lib/format";
 import { MESICE_LABELS } from "@/lib/prace-filters";
@@ -27,13 +28,14 @@ export async function sendVykazApprovalEmail({
   vykaz,
   polozky,
   toEmail,
+  zakaznikNazev,
 }: {
   vykaz: VykazPrace;
   polozky: OdvedenaPrace[];
   toEmail: string;
+  zakaznikNazev: string;
 }) {
-  const baseUrl = getAppUrl();
-  const approveUrl = `${baseUrl}/schvaleni/${vykaz.approval_token}`;
+  const approveUrl = `${getAppUrl()}/schvaleni/${vykaz.approval_token}`;
 
   let total = 0;
   const rowsHtml = polozky
@@ -51,46 +53,49 @@ export async function sendVykazApprovalEmail({
     })
     .join("");
 
-  const html = `
-    <div style="font-family:sans-serif;max-width:960px;color:#111">
-      <p>Dobrý den,</p>
-      <p>zasíláme Vám výkaz práce za období <strong>${obdobiLabel(vykaz.obdobi)}</strong>.</p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;table-layout:fixed">
-        <colgroup>
-          <col style="width:9%">
-          <col style="width:8%">
-          <col style="width:17%">
-          <col style="width:44%">
-          <col style="width:9%">
-          <col style="width:13%">
-        </colgroup>
-        <thead>
-          <tr style="background:#f3f4f6">
-            <th style="padding:10px;text-align:left;white-space:nowrap">Datum</th>
-            <th style="padding:10px;text-align:left">Projekt</th>
-            <th style="padding:10px;text-align:left;white-space:nowrap">Pracovník</th>
-            <th style="padding:10px;text-align:left">Popis</th>
-            <th style="padding:10px;text-align:right;white-space:nowrap">Čas</th>
-            <th style="padding:10px;text-align:right;white-space:nowrap">Částka</th>
-          </tr>
-        </thead>
-        <tbody>${rowsHtml}</tbody>
-        <tfoot>
-          <tr>
-            <td colspan="5" style="padding:12px 10px;text-align:right;font-weight:bold">Celkem</td>
-            <td style="padding:12px 10px;text-align:right;font-weight:bold;white-space:nowrap">${formatMoney(total)}</td>
-          </tr>
-        </tfoot>
-      </table>
-      <p>
-        <a href="${approveUrl}"
-           style="display:inline-block;background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
-          Zobrazit a schválit výkaz
-        </a>
-      </p>
-      <p style="color:#666;font-size:13px">Nebo otevřete odkaz: ${approveUrl}</p>
-      <p style="color:#666;font-size:13px">S pozdravem,<br>ISSP</p>
-    </div>`;
+  const tableHtml = `
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0;table-layout:fixed">
+      <colgroup>
+        <col style="width:9%">
+        <col style="width:8%">
+        <col style="width:17%">
+        <col style="width:44%">
+        <col style="width:9%">
+        <col style="width:13%">
+      </colgroup>
+      <thead>
+        <tr style="background:#f3f4f6">
+          <th style="padding:10px;text-align:left;white-space:nowrap">Datum</th>
+          <th style="padding:10px;text-align:left">Projekt</th>
+          <th style="padding:10px;text-align:left;white-space:nowrap">Pracovník</th>
+          <th style="padding:10px;text-align:left">Popis</th>
+          <th style="padding:10px;text-align:right;white-space:nowrap">Čas</th>
+          <th style="padding:10px;text-align:right;white-space:nowrap">Částka</th>
+        </tr>
+      </thead>
+      <tbody>${rowsHtml}</tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5" style="padding:12px 10px;text-align:right;font-weight:bold">Celkem</td>
+          <td style="padding:12px 10px;text-align:right;font-weight:bold;white-space:nowrap">${formatMoney(total)}</td>
+        </tr>
+      </tfoot>
+    </table>`;
+
+  const html = buildBrandedEmailHtml({
+    title: `Výkaz práce společnosti ${zakaznikNazev}`,
+    paragraphs: [
+      "Dobrý den,",
+      `zasíláme Vám výkaz práce za období ${obdobiLabel(vykaz.obdobi)}. Podrobný přehled najdete v tabulce níže a v příloze ve formátu Excel.`,
+    ],
+    details: [
+      { label: "Období", value: obdobiLabel(vykaz.obdobi) },
+      { label: "Celková částka", value: formatMoney(total) },
+    ],
+    extraHtml: tableHtml,
+    cta: { label: "Zobrazit a schválit výkaz", href: approveUrl },
+    plainLink: approveUrl,
+  });
 
   const workbook = await buildVykazWorkbook(polozky);
   const filename = buildVykazFilename(polozky, vykaz.obdobi);

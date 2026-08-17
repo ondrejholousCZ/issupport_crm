@@ -75,6 +75,7 @@ export async function sendVykazAction(vykazId: string, formData: FormData) {
     vykaz,
     polozky,
     toEmail: email,
+    zakaznikNazev: vykazBefore.zakaznik_nazev ?? "zákazník",
   });
 
   revalidatePath("/vykazy");

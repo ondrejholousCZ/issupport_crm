@@ -4,14 +4,18 @@ import type { Faktura } from "@/lib/types";
 export async function listFaktury(zakaznikId?: string): Promise<Faktura[]> {
   const result = await query<Faktura>(
     zakaznikId
-      ? `SELECT f.*, z.nazev AS zakaznik_nazev, p.nazev_projektu AS projekt_nazev, s.nazev_sluzby AS sluzba_nazev
+      ? `SELECT f.*, z.nazev AS zakaznik_nazev, z.fakturacni_email AS zakaznik_fakturacni_email,
+                z.kontaktni_email AS zakaznik_kontaktni_email,
+                p.nazev_projektu AS projekt_nazev, s.nazev_sluzby AS sluzba_nazev
          FROM faktura f
          JOIN zakaznik z ON z.id = f.zakaznik_id
          LEFT JOIN projekt p ON p.id = f.projekt_id
          LEFT JOIN sluzba s ON s.id = f.sluzba_id
          WHERE f.zakaznik_id = $1
          ORDER BY f.datum_vystaveni DESC NULLS LAST, f.created_at DESC`
-      : `SELECT f.*, z.nazev AS zakaznik_nazev, p.nazev_projektu AS projekt_nazev, s.nazev_sluzby AS sluzba_nazev
+      : `SELECT f.*, z.nazev AS zakaznik_nazev, z.fakturacni_email AS zakaznik_fakturacni_email,
+                z.kontaktni_email AS zakaznik_kontaktni_email,
+                p.nazev_projektu AS projekt_nazev, s.nazev_sluzby AS sluzba_nazev
          FROM faktura f
          JOIN zakaznik z ON z.id = f.zakaznik_id
          LEFT JOIN projekt p ON p.id = f.projekt_id
@@ -24,7 +28,9 @@ export async function listFaktury(zakaznikId?: string): Promise<Faktura[]> {
 
 export async function getFaktura(id: string): Promise<Faktura | null> {
   const result = await query<Faktura>(
-    `SELECT f.*, z.nazev AS zakaznik_nazev, p.nazev_projektu AS projekt_nazev, s.nazev_sluzby AS sluzba_nazev
+    `SELECT f.*, z.nazev AS zakaznik_nazev, z.fakturacni_email AS zakaznik_fakturacni_email,
+            z.kontaktni_email AS zakaznik_kontaktni_email,
+            p.nazev_projektu AS projekt_nazev, s.nazev_sluzby AS sluzba_nazev
      FROM faktura f
      JOIN zakaznik z ON z.id = f.zakaznik_id
      LEFT JOIN projekt p ON p.id = f.projekt_id
@@ -136,6 +142,13 @@ export async function updateFaktura(
     ],
   );
   return result.rows[0];
+}
+
+export async function markFakturaSent(id: string, email: string) {
+  await query(
+    `UPDATE faktura SET odeslano_email = $2, odeslano_at = now() WHERE id = $1`,
+    [id, email],
+  );
 }
 
 export async function deleteFaktura(id: string) {

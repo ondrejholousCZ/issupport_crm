@@ -18,6 +18,7 @@ export async function createZakaznik(data: {
   nazev: string;
   zkratka?: string;
   kontaktni_email?: string;
+  fakturacni_email?: string;
   kontaktni_telefon?: string;
   fakturacni_ulice?: string;
   fakturacni_mesto?: string;
@@ -28,15 +29,16 @@ export async function createZakaznik(data: {
 }) {
   const result = await query<Zakaznik>(
     `INSERT INTO zakaznik (
-      ico, nazev, zkratka, kontaktni_email, kontaktni_telefon,
+      ico, nazev, zkratka, kontaktni_email, fakturacni_email, kontaktni_telefon,
       fakturacni_ulice, fakturacni_mesto, fakturacni_psc, postup_fakturace, idoklad_partner_id, stav
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
     RETURNING *`,
     [
       data.ico || null,
       data.nazev,
       data.zkratka || null,
       data.kontaktni_email || null,
+      data.fakturacni_email || null,
       data.kontaktni_telefon || null,
       data.fakturacni_ulice || null,
       data.fakturacni_mesto || null,
@@ -56,6 +58,7 @@ export async function updateZakaznik(
     nazev: string;
     zkratka?: string;
     kontaktni_email?: string;
+    fakturacni_email?: string;
     kontaktni_telefon?: string;
     fakturacni_ulice?: string;
     fakturacni_mesto?: string;
@@ -67,9 +70,9 @@ export async function updateZakaznik(
 ) {
   const result = await query<Zakaznik>(
     `UPDATE zakaznik SET
-      ico = $2, nazev = $3, zkratka = $4, kontaktni_email = $5, kontaktni_telefon = $6,
-      fakturacni_ulice = $7, fakturacni_mesto = $8, fakturacni_psc = $9,
-      postup_fakturace = $10, idoklad_partner_id = $11, stav = $12
+      ico = $2, nazev = $3, zkratka = $4, kontaktni_email = $5, fakturacni_email = $6, kontaktni_telefon = $7,
+      fakturacni_ulice = $8, fakturacni_mesto = $9, fakturacni_psc = $10,
+      postup_fakturace = $11, idoklad_partner_id = $12, stav = $13
     WHERE id = $1
     RETURNING *`,
     [
@@ -78,6 +81,7 @@ export async function updateZakaznik(
       data.nazev,
       data.zkratka || null,
       data.kontaktni_email || null,
+      data.fakturacni_email || null,
       data.kontaktni_telefon || null,
       data.fakturacni_ulice || null,
       data.fakturacni_mesto || null,

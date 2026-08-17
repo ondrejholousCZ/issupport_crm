@@ -20,6 +20,7 @@ function parse(formData: FormData) {
     nazev: formStr(formData, "nazev"),
     zkratka: formOptStr(formData, "zkratka"),
     kontaktni_email: formOptStr(formData, "kontaktni_email"),
+    fakturacni_email: formOptStr(formData, "fakturacni_email"),
     kontaktni_telefon: formOptStr(formData, "kontaktni_telefon"),
     fakturacni_ulice: formOptStr(formData, "fakturacni_ulice"),
     fakturacni_mesto: formOptStr(formData, "fakturacni_mesto"),

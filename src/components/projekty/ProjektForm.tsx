@@ -128,7 +128,7 @@ export function ProjektForm({
             name="faktura_duzp_typ"
             defaultValue={defaultValues.faktura_duzp_typ ?? "konec_obdobi"}
             options={[
-              { value: "konec_obdobi", label: "Poslední den období výkazu" },
+              { value: "konec_obdobi", label: "Poslední den předchozího měsíce" },
               { value: "vystaveni", label: "Datum vystavení" },
             ]}
           />
