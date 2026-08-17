@@ -195,6 +195,24 @@ export function buildFakturaBlobPath(input: {
   return buildFakturaBlobTarget(input).path;
 }
 
+export async function downloadFakturaPdf(filePath: string): Promise<Buffer> {
+  const config = getStorageConfig();
+  const normalized = filePath.replace(/^\/+/, "");
+
+  try {
+    const shareClient = getShareServiceClient(config).getShareClient(config.shareName);
+    const fileClient = shareClient.rootDirectoryClient.getFileClient(normalized);
+    const download = await fileClient.download();
+    const chunks: Buffer[] = [];
+    for await (const chunk of download.readableStreamBody ?? []) {
+      chunks.push(Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
+  } catch (err) {
+    throw wrapStorageError(err, config);
+  }
+}
+
 export async function uploadFakturaPdf(filePath: string, pdf: Buffer): Promise<void> {
   const config = getStorageConfig();
   const normalized = filePath.replace(/^\/+/, "");
