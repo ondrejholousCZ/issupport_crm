@@ -90,9 +90,9 @@ export function FakturaceTimelineView({ timeline }: { timeline: TimelineMonthDat
                 {month.prace.map((p) => (
                   <TimelineCard
                     key={`p-${p.projektId}-${month.key}`}
-                    href={`/prace?mesic=${month.key}&zakaznik=${p.zakaznikId}&projekt=${p.projektId}&stav=nefakturovano`}
+                    href={`/prace?mesic=${month.key}&zakaznik=${p.zakaznikId}&projekt=${encodeURIComponent(p.projektZakazka)}&stav=nefakturovano`}
                     tone="amber"
-                    title={p.projektNazev}
+                    title={p.projektZakazka}
                     subtitle={`${p.zakaznikNazev} · ${p.pocet} záznamů`}
                     amount={formatMoney(p.castka)}
                   />

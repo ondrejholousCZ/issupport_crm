@@ -161,6 +161,7 @@ export type TimelinePraceItem = {
   zakaznikId: string;
   zakaznikNazev: string;
   projektId: string;
+  projektZakazka: string;
   projektNazev: string;
   pocet: number;
   castka: number;

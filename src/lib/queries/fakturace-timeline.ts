@@ -31,6 +31,7 @@ export async function buildFakturaceTimeline(): Promise<TimelineMonthData[]> {
       zakaznik_nazev: string;
       projekt_id: string;
       projekt_nazev: string;
+      projekt_zakazka: string;
       pocet: number;
       castka: string;
     }>(
@@ -40,6 +41,7 @@ export async function buildFakturaceTimeline(): Promise<TimelineMonthData[]> {
          z.nazev AS zakaznik_nazev,
          op.projekt_id,
          p.nazev_projektu AS projekt_nazev,
+         COALESCE(NULLIF(TRIM(p.zakazka), ''), p.nazev_projektu) AS projekt_zakazka,
          COUNT(*)::int AS pocet,
          COALESCE(SUM(op.castka_fakturace), 0)::text AS castka
        FROM odvedena_prace op
@@ -48,7 +50,7 @@ export async function buildFakturaceTimeline(): Promise<TimelineMonthData[]> {
        WHERE op.stav_fakturace = 'nefakturovano'
          AND op.datum >= $1::date
          AND op.datum <= $2::date
-       GROUP BY 1, 2, 3, 4, 5
+       GROUP BY 1, 2, 3, 4, 5, 6
        ORDER BY 1, z.nazev, p.nazev_projektu`,
       [rangeStart, rangeEnd],
     ),
@@ -74,6 +76,7 @@ export async function buildFakturaceTimeline(): Promise<TimelineMonthData[]> {
     zakaznikId: r.zakaznik_id,
     zakaznikNazev: r.zakaznik_nazev,
     projektId: r.projekt_id,
+    projektZakazka: r.projekt_zakazka,
     projektNazev: r.projekt_nazev,
     pocet: r.pocet,
     castka: Number(r.castka),

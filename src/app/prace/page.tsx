@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { requireSession } from "@/lib/auth/require-session";
 import { parsePraceFilters, praceFiltersToQuery } from "@/lib/prace-filters";
 import { summarizePrace } from "@/lib/prace-summary";
-import { listDistinctProjektZakazky, listProjektOptions } from "@/lib/queries/projekt";
+import { listDistinctProjektZakazky, listProjektOptions, resolveProjektFilterValues } from "@/lib/queries/projekt";
 import { listPracovnikOptions } from "@/lib/queries/pracovnik";
 import { getPrace, listPrace } from "@/lib/queries/prace";
 import { listRozpracovaneVykazy } from "@/lib/queries/vykaz-prace";
@@ -30,7 +30,16 @@ export default async function PracePage({
 }) {
   if (!(await requireSession())) redirect("/login");
   const params = await searchParams;
-  const filters = parsePraceFilters(params);
+  const rawFilters = parsePraceFilters(params);
+  const projektZakazky = await resolveProjektFilterValues(rawFilters.projektZakazky);
+  const filters = { ...rawFilters, projektZakazky };
+
+  if (projektZakazky.join(",") !== rawFilters.projektZakazky.join(",")) {
+    const extra: Record<string, string> = {};
+    if (params.nova) extra.nova = params.nova;
+    if (params.upravit) extra.upravit = params.upravit;
+    redirect(`/prace?${praceFiltersToQuery(filters, extra)}`);
+  }
 
   const editRow = params.upravit ? await getPrace(params.upravit) : null;
   if (params.upravit && !editRow) notFound();

@@ -107,6 +107,26 @@ export async function listDistinctProjektNazvy(): Promise<{ id: string; label: s
   return listDistinctProjektZakazky();
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Převede hodnoty filtru projekt — UUID z timeline na zkrácený název (zakázka). */
+export async function resolveProjektFilterValues(values: string[]): Promise<string[]> {
+  if (values.length === 0) return [];
+
+  const uuids = values.filter((v) => UUID_RE.test(v));
+  const labels = values.filter((v) => !UUID_RE.test(v));
+  if (uuids.length === 0) return labels;
+
+  const result = await query<{ label: string }>(
+    `SELECT COALESCE(NULLIF(TRIM(zakazka), ''), nazev_projektu) AS label
+     FROM projekt
+     WHERE id = ANY($1::uuid[])`,
+    [uuids],
+  );
+
+  return [...labels, ...result.rows.map((r) => r.label)];
+}
+
 export async function listProjektOptions(zakaznikId?: string) {
   const result = await query<{ id: string; label: string; zakaznik_id: string }>(
     zakaznikId
