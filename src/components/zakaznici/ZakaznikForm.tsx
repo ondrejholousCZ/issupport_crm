@@ -17,6 +17,7 @@ export type ZakaznikFormValues = {
   fakturacni_mesto?: string;
   fakturacni_psc?: string;
   postup_fakturace?: string;
+  idoklad_partner_id?: string;
 };
 
 export function ZakaznikForm({
@@ -165,6 +166,13 @@ export function ZakaznikForm({
           name="fakturacni_psc"
           value={fakturacniPsc}
           onChange={(e) => setFakturacniPsc(e.target.value)}
+        />
+        <FormField
+          label="iDoklad partner ID"
+          name="idoklad_partner_id"
+          type="number"
+          defaultValue={defaultValues.idoklad_partner_id ?? ""}
+          hint="Volitelné — jinak se dohledá podle IČO"
         />
       </FormGrid>
 

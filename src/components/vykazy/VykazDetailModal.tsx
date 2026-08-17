@@ -17,8 +17,10 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatCas, formatDate, formatMoney } from "@/lib/format";
 import { MESICE_LABELS } from "@/lib/prace-filters";
 import { vykazStavLabels } from "@/lib/labels";
-import type { OdvedenaPrace, VykazPrace } from "@/lib/types";
+import type { Faktura, OdvedenaPrace, VykazPrace } from "@/lib/types";
+import type { InvoiceDraft } from "@/lib/faktura-sablona";
 import { summarizePrace, formatTotalHours } from "@/lib/prace-summary";
+import { VykazInvoicePanel } from "@/components/vykazy/VykazInvoicePanel";
 
 function obdobiLabel(obdobi: string) {
   const [rok, mesic] = obdobi.split("-");
@@ -35,9 +37,13 @@ function vykazTone(stav: VykazPrace["stav"]) {
 export function VykazDetailModal({
   vykaz,
   polozky,
+  invoiceDraft,
+  linkedFaktura,
 }: {
   vykaz: VykazPrace | null;
   polozky: OdvedenaPrace[];
+  invoiceDraft?: InvoiceDraft | null;
+  linkedFaktura?: Faktura | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -158,6 +164,14 @@ export function VykazDetailModal({
               </p>
             </div>
           </>
+        ) : null}
+
+        {vykaz.stav === "schvaleny" ? (
+          <VykazInvoicePanel
+            vykazId={vykaz.id}
+            draft={invoiceDraft ?? null}
+            faktura={linkedFaktura ?? null}
+          />
         ) : null}
 
         {vykaz.stav === "odeslany" || vykaz.stav === "schvaleny" ? (

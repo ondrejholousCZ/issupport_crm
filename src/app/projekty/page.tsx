@@ -11,6 +11,7 @@ import { requireSession } from "@/lib/auth/require-session";
 import { formatDate, formatProjektSazba } from "@/lib/format";
 import { projektStavLabels } from "@/lib/labels";
 import { getProjekt, listProjekty } from "@/lib/queries/projekt";
+import { getSablonaForProjekt } from "@/lib/queries/fakturacni-sablona";
 import { listZakaznikOptions } from "@/lib/queries/zakaznik";
 
 export default async function ProjektyPage({
@@ -20,10 +21,11 @@ export default async function ProjektyPage({
 }) {
   if (!(await requireSession())) redirect("/login");
   const params = await searchParams;
-  const [rows, zakaznici, editRow] = await Promise.all([
+  const [rows, zakaznici, editRow, editSablona] = await Promise.all([
     listProjekty(),
     listZakaznikOptions(),
     params.upravit ? getProjekt(params.upravit) : Promise.resolve(null),
+    params.upravit ? getSablonaForProjekt(params.upravit) : Promise.resolve(null),
   ]);
   if (params.upravit && !editRow) notFound();
 
@@ -41,7 +43,7 @@ export default async function ProjektyPage({
       }
     >
       <Suspense fallback={null}>
-        <UpravitProjektModal editRow={editRow} zakaznici={zakaznici} returnPath="/projekty" />
+        <UpravitProjektModal editRow={editRow} sablona={editSablona} zakaznici={zakaznici} returnPath="/projekty" />
       </Suspense>
 
       {rows.length === 0 ? (

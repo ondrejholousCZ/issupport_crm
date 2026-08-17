@@ -43,19 +43,24 @@ export async function createFaktura(data: {
   datum_vystaveni?: string;
   datum_splatnosti?: string;
   datum_uhrazeni?: string;
+  datum_duzp?: string;
   castka_bez_dph?: string;
   dph_sazba?: string;
   castka_celkem?: string;
   stav: string;
   typ_faktury?: string;
   external_ref?: string;
+  vykaz_id?: string;
+  idoklad_id?: number;
+  idoklad_url?: string;
 }) {
   const result = await query<Faktura>(
     `INSERT INTO faktura (
       cislo_faktury, zakaznik_id, projekt_id, sluzba_id,
-      datum_vystaveni, datum_splatnosti, datum_uhrazeni,
-      castka_bez_dph, dph_sazba, castka_celkem, stav, typ_faktury, external_ref
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+      datum_vystaveni, datum_splatnosti, datum_uhrazeni, datum_duzp,
+      castka_bez_dph, dph_sazba, castka_celkem, stav, typ_faktury, external_ref,
+      vykaz_id, idoklad_id, idoklad_url
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`,
     [
       data.cislo_faktury || null,
       data.zakaznik_id,
@@ -64,12 +69,16 @@ export async function createFaktura(data: {
       data.datum_vystaveni || null,
       data.datum_splatnosti || null,
       data.datum_uhrazeni || null,
+      data.datum_duzp || null,
       data.castka_bez_dph || null,
       data.dph_sazba || "21",
       data.castka_celkem || null,
       data.stav,
       data.typ_faktury || null,
       data.external_ref || null,
+      data.vykaz_id || null,
+      data.idoklad_id ?? null,
+      data.idoklad_url || null,
     ],
   );
   return result.rows[0];
@@ -85,20 +94,25 @@ export async function updateFaktura(
     datum_vystaveni?: string;
     datum_splatnosti?: string;
     datum_uhrazeni?: string;
+    datum_duzp?: string;
     castka_bez_dph?: string;
     dph_sazba?: string;
     castka_celkem?: string;
     stav: string;
     typ_faktury?: string;
     external_ref?: string;
+    vykaz_id?: string;
+    idoklad_id?: number | null;
+    idoklad_url?: string;
   },
 ) {
   const result = await query<Faktura>(
     `UPDATE faktura SET
       cislo_faktury = $2, zakaznik_id = $3, projekt_id = $4, sluzba_id = $5,
-      datum_vystaveni = $6, datum_splatnosti = $7, datum_uhrazeni = $8,
-      castka_bez_dph = $9, dph_sazba = $10, castka_celkem = $11,
-      stav = $12, typ_faktury = $13, external_ref = $14
+      datum_vystaveni = $6, datum_splatnosti = $7, datum_uhrazeni = $8, datum_duzp = $9,
+      castka_bez_dph = $10, dph_sazba = $11, castka_celkem = $12,
+      stav = $13, typ_faktury = $14, external_ref = $15,
+      vykaz_id = $16, idoklad_id = $17, idoklad_url = $18
      WHERE id = $1 RETURNING *`,
     [
       id,
@@ -109,12 +123,16 @@ export async function updateFaktura(
       data.datum_vystaveni || null,
       data.datum_splatnosti || null,
       data.datum_uhrazeni || null,
+      data.datum_duzp || null,
       data.castka_bez_dph || null,
       data.dph_sazba || "21",
       data.castka_celkem || null,
       data.stav,
       data.typ_faktury || null,
       data.external_ref || null,
+      data.vykaz_id || null,
+      data.idoklad_id ?? null,
+      data.idoklad_url || null,
     ],
   );
   return result.rows[0];

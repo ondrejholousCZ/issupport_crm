@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/require-session";
-import { formOptStr, formStr } from "@/lib/form";
+import { formOptInt, formOptStr, formStr } from "@/lib/form";
 import {
   createZakaznik,
   deleteZakaznik,
@@ -25,6 +25,7 @@ function parse(formData: FormData) {
     fakturacni_mesto: formOptStr(formData, "fakturacni_mesto"),
     fakturacni_psc: formOptStr(formData, "fakturacni_psc"),
     postup_fakturace: formOptStr(formData, "postup_fakturace"),
+    idoklad_partner_id: formOptInt(formData, "idoklad_partner_id"),
     stav: formStr(formData, "stav") || "aktivni",
   };
 }

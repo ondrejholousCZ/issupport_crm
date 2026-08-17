@@ -9,7 +9,11 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireSession } from "@/lib/auth/require-session";
 import { MESICE_LABELS } from "@/lib/prace-filters";
 import { vykazStavLabels } from "@/lib/labels";
+import { getFaktura } from "@/lib/queries/faktura";
+import { prepareInvoiceDraftFromVykaz } from "@/lib/queries/faktura-from-vykaz";
 import { getVykaz, getVykazPolozky, listVykazy } from "@/lib/queries/vykaz-prace";
+import type { InvoiceDraft } from "@/lib/faktura-sablona";
+import type { Faktura } from "@/lib/types";
 
 function obdobiLabel(obdobi: string) {
   const [rok, mesic] = obdobi.split("-");
@@ -39,10 +43,28 @@ export default async function VykazyPage({
 
   if (params.detail && !detailVykaz) notFound();
 
+  let linkedFaktura: Faktura | null = null;
+  let invoiceDraft: InvoiceDraft | null = null;
+
+  if (detailVykaz?.faktura_id) {
+    linkedFaktura = await getFaktura(detailVykaz.faktura_id);
+  } else if (detailVykaz?.stav === "schvaleny") {
+    try {
+      invoiceDraft = await prepareInvoiceDraftFromVykaz(detailVykaz.id);
+    } catch {
+      invoiceDraft = null;
+    }
+  }
+
   return (
     <AppShell title="Výkazy práce">
       <Suspense fallback={null}>
-        <VykazDetailModal vykaz={detailVykaz} polozky={detailPolozky} />
+        <VykazDetailModal
+          vykaz={detailVykaz}
+          polozky={detailPolozky}
+          invoiceDraft={invoiceDraft}
+          linkedFaktura={linkedFaktura}
+        />
       </Suspense>
 
       {rows.length === 0 ? (

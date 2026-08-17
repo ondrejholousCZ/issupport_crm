@@ -66,7 +66,8 @@ export function UpravitFakturaModal({
           castka_celkem: editRow.castka_celkem ?? "",
           stav: editRow.stav,
           typ_faktury: editRow.typ_faktury ?? "",
-          external_ref: editRow.external_ref ?? "",
+          external_ref: editRow.external_ref ?? editRow.idoklad_id?.toString() ?? "",
+          idoklad_url: editRow.idoklad_url ?? "",
         }}
       />
       <div className="mt-4 border-t border-border pt-4">

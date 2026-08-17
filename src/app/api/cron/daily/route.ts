@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { markOverdueInvoices } from "@/lib/queries/faktura";
+import { syncAllIdokladPayments } from "@/lib/queries/faktura-from-vykaz";
 import { listSluzbyDueSoon } from "@/lib/queries/sluzba";
 
 export async function GET(request: Request) {
@@ -12,11 +13,17 @@ export async function GET(request: Request) {
 
   const overdue = await markOverdueInvoices();
   const dueSoon = await listSluzbyDueSoon(30);
+  let idokladPaid = 0;
+  try {
+    idokladPaid = await syncAllIdokladPayments();
+  } catch {
+    idokladPaid = 0;
+  }
 
-  // E-mail notifikace přijdou ve fázi 2 — zatím jen log / JSON odpověď
   return NextResponse.json({
     ok: true,
     overdue_invoices_updated: overdue,
     services_due_within_30_days: dueSoon.length,
+    idoklad_payments_synced: idokladPaid,
   });
 }

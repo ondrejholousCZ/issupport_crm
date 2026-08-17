@@ -23,13 +23,14 @@ export async function createZakaznik(data: {
   fakturacni_mesto?: string;
   fakturacni_psc?: string;
   postup_fakturace?: string;
+  idoklad_partner_id?: number | null;
   stav: string;
 }) {
   const result = await query<Zakaznik>(
     `INSERT INTO zakaznik (
       ico, nazev, zkratka, kontaktni_email, kontaktni_telefon,
-      fakturacni_ulice, fakturacni_mesto, fakturacni_psc, postup_fakturace, stav
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      fakturacni_ulice, fakturacni_mesto, fakturacni_psc, postup_fakturace, idoklad_partner_id, stav
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
     RETURNING *`,
     [
       data.ico || null,
@@ -41,6 +42,7 @@ export async function createZakaznik(data: {
       data.fakturacni_mesto || null,
       data.fakturacni_psc || null,
       data.postup_fakturace || null,
+      data.idoklad_partner_id ?? null,
       data.stav,
     ],
   );
@@ -59,6 +61,7 @@ export async function updateZakaznik(
     fakturacni_mesto?: string;
     fakturacni_psc?: string;
     postup_fakturace?: string;
+    idoklad_partner_id?: number | null;
     stav: string;
   },
 ) {
@@ -66,7 +69,7 @@ export async function updateZakaznik(
     `UPDATE zakaznik SET
       ico = $2, nazev = $3, zkratka = $4, kontaktni_email = $5, kontaktni_telefon = $6,
       fakturacni_ulice = $7, fakturacni_mesto = $8, fakturacni_psc = $9,
-      postup_fakturace = $10, stav = $11
+      postup_fakturace = $10, idoklad_partner_id = $11, stav = $12
     WHERE id = $1
     RETURNING *`,
     [
@@ -80,6 +83,7 @@ export async function updateZakaznik(
       data.fakturacni_mesto || null,
       data.fakturacni_psc || null,
       data.postup_fakturace || null,
+      data.idoklad_partner_id ?? null,
       data.stav,
     ],
   );

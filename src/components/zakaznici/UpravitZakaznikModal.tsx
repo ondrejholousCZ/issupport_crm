@@ -56,6 +56,7 @@ export function UpravitZakaznikModal({
           fakturacni_mesto: editRow.fakturacni_mesto ?? "",
           fakturacni_psc: editRow.fakturacni_psc ?? "",
           postup_fakturace: editRow.postup_fakturace ?? "",
+          idoklad_partner_id: editRow.idoklad_partner_id?.toString() ?? "",
         }}
       />
     </DraggableModal>

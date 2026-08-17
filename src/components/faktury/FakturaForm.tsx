@@ -20,6 +20,7 @@ export type FakturaFormValues = {
   stav?: string;
   typ_faktury?: string;
   external_ref?: string;
+  idoklad_url?: string;
 };
 
 type ZakaznikOption = { id: string; nazev: string };
@@ -143,11 +144,18 @@ export function FakturaForm({
           ]}
         />
         <FormField
-          label="External ref (FaktuMatch)"
+          label="iDoklad ID"
           name="external_ref"
           defaultValue={defaultValues.external_ref ?? ""}
-          hint="Pro budoucí napojení"
+          hint="ID faktury v iDokladu (vyplní se automaticky)"
         />
+        {defaultValues.idoklad_url ? (
+          <p className="text-sm col-span-2">
+            <a href={defaultValues.idoklad_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              Otevřít v iDokladu
+            </a>
+          </p>
+        ) : null}
       </FormGrid>
       <div className="flex gap-2 pt-2">
         <SubmitButton>Uložit</SubmitButton>

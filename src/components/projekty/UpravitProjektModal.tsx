@@ -5,17 +5,19 @@ import { useCallback, useEffect, useState } from "react";
 import { DraggableModal } from "@/components/ui/DraggableModal";
 import { DeleteForm } from "@/components/DeleteForm";
 import { deleteProjektAction, updateProjektAction } from "@/lib/actions/projekt";
-import type { Projekt } from "@/lib/types";
+import type { FakturacniSablona, Projekt } from "@/lib/types";
 import { ProjektForm } from "./ProjektForm";
 
 type ZakaznikOption = { id: string; nazev: string };
 
 export function UpravitProjektModal({
   editRow,
+  sablona,
   zakaznici,
   returnPath,
 }: {
   editRow: Projekt | null;
+  sablona: FakturacniSablona | null;
   zakaznici: ZakaznikOption[];
   returnPath: string;
 }) {
@@ -60,6 +62,11 @@ export function UpravitProjektModal({
           jednotka_sazby: editRow.jednotka_sazby ?? "hodina",
           mena: editRow.mena,
           stav: editRow.stav,
+          faktura_text_sablona: sablona?.text_sablona,
+          faktura_jednotka: sablona?.jednotka,
+          faktura_splatnost_dnu: sablona?.splatnost_dnu,
+          faktura_duzp_typ: sablona?.duzp_typ,
+          faktura_dph_sazba: sablona?.dph_sazba,
         }}
       />
       <div className="mt-4 border-t border-border pt-4">

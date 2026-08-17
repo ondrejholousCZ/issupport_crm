@@ -11,6 +11,8 @@ export type SluzbaStav = "aktivni" | "pozastavena" | "ukoncena";
 export type DruhCinnosti = "prace" | "administrativa" | "konzultace" | "cestovne";
 export type StavFakturace = "nefakturovano" | "schvaleni_vykazu" | "fakturovano" | "storno";
 export type VykazStav = "rozpracovany" | "odeslany" | "schvaleny";
+export type FakturacniJednotka = "md" | "hodina" | "ks";
+export type DuzpTyp = "konec_obdobi" | "vystaveni";
 
 export interface Zakaznik {
   id: string;
@@ -23,6 +25,7 @@ export interface Zakaznik {
   fakturacni_mesto: string | null;
   fakturacni_psc: string | null;
   postup_fakturace: string | null;
+  idoklad_partner_id: number | null;
   stav: ZakaznikStav;
   created_at: string;
   updated_at: string;
@@ -72,11 +75,38 @@ export interface Faktura {
   stav: FakturaStav;
   typ_faktury: FakturaTyp | null;
   external_ref: string | null;
+  vykaz_id: string | null;
+  datum_duzp: string | null;
+  idoklad_id: number | null;
+  idoklad_url: string | null;
   created_at: string;
   updated_at: string;
   zakaznik_nazev?: string;
   projekt_nazev?: string | null;
   sluzba_nazev?: string | null;
+}
+
+export interface FakturaPolozka {
+  id: string;
+  faktura_id: string;
+  nazev: string;
+  mnozstvi: string;
+  jednotka: string;
+  cena_jednotka: string;
+  dph_sazba: string;
+  poradi: number;
+}
+
+export interface FakturacniSablona {
+  id: string;
+  projekt_id: string;
+  text_sablona: string;
+  jednotka: FakturacniJednotka;
+  splatnost_dnu: number;
+  duzp_typ: DuzpTyp;
+  dph_sazba: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Sluzba {
@@ -133,6 +163,7 @@ export interface VykazPrace {
   odeslano_at: string | null;
   odeslano_email: string | null;
   approval_token: string | null;
+  faktura_id: string | null;
   created_at: string;
   updated_at: string;
   zakaznik_nazev?: string;
