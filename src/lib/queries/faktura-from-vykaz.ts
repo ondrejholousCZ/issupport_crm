@@ -12,7 +12,7 @@ import { getSablonyForProjekty } from "@/lib/queries/fakturacni-sablona";
 import { getVykaz, getVykazPolozky } from "@/lib/queries/vykaz-prace";
 import { getZakaznik } from "@/lib/queries/zakaznik";
 import {
-  buildFakturaBlobPath,
+  buildFakturaBlobTarget,
   getFakturaBlobReadUrl,
   uploadFakturaPdf,
 } from "@/lib/storage/faktura-blob";
@@ -114,13 +114,13 @@ export async function issueVykazToIdoklad(
   });
 
   const pdf = await downloadIssuedInvoicePdf(issued.Id);
-  const pdfBlobPath = buildFakturaBlobPath({
+  const pdfBlobTarget = buildFakturaBlobTarget({
     datumVystaveni,
     cisloFaktury: issued.DocumentNumber,
     idokladId: issued.Id,
   });
-  await uploadFakturaPdf(pdfBlobPath, pdf);
-  const pdfUrl = getFakturaBlobReadUrl(pdfBlobPath);
+  await uploadFakturaPdf(pdfBlobTarget.path, pdf);
+  const pdfUrl = getFakturaBlobReadUrl(pdfBlobTarget.path);
 
   const faktura = await createFaktura({
     cislo_faktury: issued.DocumentNumber,
@@ -137,7 +137,7 @@ export async function issueVykazToIdoklad(
     external_ref: String(issued.Id),
     vykaz_id: vykazId,
     idoklad_id: issued.Id,
-    pdf_blob_path: pdfBlobPath,
+    pdf_blob_path: pdfBlobTarget.path,
     pdf_url: pdfUrl,
   });
 
