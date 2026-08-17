@@ -15,7 +15,7 @@ export function FakturaEmailPanel({
   defaultEmail: string;
   returnTo?: string;
 }) {
-  if (!faktura.idoklad_id && !faktura.idoklad_url) return null;
+  if (!faktura.pdf_url && !faktura.pdf_blob_path && !faktura.idoklad_id) return null;
 
   const send = sendFakturaEmailAction.bind(null, faktura.id);
 
@@ -24,7 +24,7 @@ export function FakturaEmailPanel({
       <div>
         <h3 className="text-sm font-semibold">Odeslat fakturu e-mailem</h3>
         <p className="text-xs text-gray-500 mt-1">
-          Odešle odkaz do iDokladu na fakturační e-mail zákazníka.
+          Odešle odkaz na PDF faktury na fakturační e-mail zákazníka.
         </p>
       </div>
       <FormField

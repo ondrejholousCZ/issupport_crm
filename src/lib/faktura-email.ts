@@ -1,6 +1,6 @@
 import { buildBrandedEmailHtml } from "@/lib/email/branded-template";
 import { getEmailLogoInlineAttachment } from "@/lib/email/logo-inline";
-import { normalizeIdokladInvoiceUrl } from "@/lib/idoklad/invoices";
+import { getFakturaDocumentUrl } from "@/lib/faktura-document-url";
 import { formatDateLong, formatMoney } from "@/lib/format";
 import { MESICE_LABELS } from "@/lib/prace-filters";
 import type { Faktura } from "@/lib/types";
@@ -24,9 +24,9 @@ export async function sendFakturaEmail({
   zakaznikNazev: string;
   obdobi?: string | null;
 }) {
-  const invoiceUrl = normalizeIdokladInvoiceUrl(faktura.idoklad_url, faktura.idoklad_id);
+  const invoiceUrl = getFakturaDocumentUrl(faktura, { fresh: true });
   if (!invoiceUrl) {
-    throw new Error("Faktura nemá odkaz do iDokladu — nejdříve ji vystavte v iDokladu.");
+    throw new Error("Faktura nemá PDF v úložišti — nejdříve ji vystavte v iDokladu.");
   }
 
   const details: Array<{ label: string; value: string }> = [
@@ -53,7 +53,7 @@ export async function sendFakturaEmail({
     title: `Faktura společnosti ${zakaznikNazev}`,
     paragraphs: [
       "Dobrý den,",
-      "zasíláme Vám fakturu za poskytnuté služby. Dokument si můžete zobrazit a stáhnout v iDokladu.",
+      "zasíláme Vám fakturu za poskytnuté služby. Dokument si můžete zobrazit a stáhnout pomocí odkazu níže.",
     ],
     details,
     cta: { label: "Zobrazit fakturu", href: invoiceUrl },

@@ -89,6 +89,41 @@ export async function idokladRequest<T>(
   return parsed as T;
 }
 
+export async function idokladDownload(path: string): Promise<{
+  buffer: Buffer;
+  contentType: string;
+  parsedJson: unknown | null;
+}> {
+  const token = await fetchAccessToken();
+  const url = path.startsWith("http") ? path : `${API_BASE}/${path.replace(/^\//, "")}`;
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json, application/pdf, */*",
+    },
+  });
+
+  const buffer = Buffer.from(await res.arrayBuffer());
+  const contentType = res.headers.get("content-type") ?? "";
+
+  if (!res.ok) {
+    const text = buffer.toString("utf8").slice(0, 300);
+    throw new Error(`iDoklad download ${path} (${res.status}): ${text}`);
+  }
+
+  let parsedJson: unknown | null = null;
+  if (contentType.includes("json")) {
+    try {
+      parsedJson = JSON.parse(buffer.toString("utf8"));
+    } catch {
+      parsedJson = null;
+    }
+  }
+
+  return { buffer, contentType, parsedJson };
+}
+
 export type IdokladListResponse<T> = {
   Data?: {
     Items?: T[];

@@ -1,16 +1,21 @@
 import { query } from "@/lib/db";
 import { buildInvoiceDraftFromVykaz, type InvoiceDraft } from "@/lib/faktura-sablona";
 import { resolvePartnerId } from "@/lib/idoklad/contacts";
+import { downloadIssuedInvoicePdf } from "@/lib/idoklad/pdf";
 import {
   buildIdokladInvoiceItem,
   createIssuedInvoice,
-  idokladInvoiceUrl,
 } from "@/lib/idoklad/invoices";
 import { createFaktura, getFaktura } from "@/lib/queries/faktura";
 import { replaceFakturaPolozky } from "@/lib/queries/faktura-polozka";
 import { getSablonyForProjekty } from "@/lib/queries/fakturacni-sablona";
 import { getVykaz, getVykazPolozky } from "@/lib/queries/vykaz-prace";
 import { getZakaznik } from "@/lib/queries/zakaznik";
+import {
+  buildFakturaBlobPath,
+  getFakturaBlobReadUrl,
+  uploadFakturaPdf,
+} from "@/lib/storage/faktura-blob";
 
 export async function prepareInvoiceDraftFromVykaz(vykazId: string): Promise<InvoiceDraft> {
   const vykaz = await getVykaz(vykazId);
@@ -108,6 +113,15 @@ export async function issueVykazToIdoklad(
     items: idokladItems,
   });
 
+  const pdf = await downloadIssuedInvoicePdf(issued.Id);
+  const pdfBlobPath = buildFakturaBlobPath({
+    datumVystaveni,
+    cisloFaktury: issued.DocumentNumber,
+    idokladId: issued.Id,
+  });
+  await uploadFakturaPdf(pdfBlobPath, pdf);
+  const pdfUrl = getFakturaBlobReadUrl(pdfBlobPath);
+
   const faktura = await createFaktura({
     cislo_faktury: issued.DocumentNumber,
     zakaznik_id: vykaz.zakaznik_id,
@@ -123,7 +137,8 @@ export async function issueVykazToIdoklad(
     external_ref: String(issued.Id),
     vykaz_id: vykazId,
     idoklad_id: issued.Id,
-    idoklad_url: idokladInvoiceUrl(issued.Id),
+    pdf_blob_path: pdfBlobPath,
+    pdf_url: pdfUrl,
   });
 
   await replaceFakturaPolozky(

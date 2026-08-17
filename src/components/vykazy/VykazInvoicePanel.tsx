@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { FakturaEmailPanel } from "@/components/faktury/FakturaEmailPanel";
-import { normalizeIdokladInvoiceUrl } from "@/lib/idoklad/invoices";
 import { issueVykazToIdokladAction } from "@/lib/actions/faktura-vykaz";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormField } from "@/components/ui/FormField";
@@ -22,7 +21,7 @@ export function VykazInvoicePanel({
   fakturacniEmail?: string;
 }) {
   if (faktura) {
-    const idokladUrl = normalizeIdokladInvoiceUrl(faktura.idoklad_url, faktura.idoklad_id);
+    const pdfUrl = faktura.pdf_url;
     return (
       <div className="rounded-lg border border-green-200 bg-green-50 p-4 space-y-2 text-sm">
         <p className="font-medium text-green-800">Faktura vystavena</p>
@@ -35,9 +34,9 @@ export function VykazInvoicePanel({
           <Link href={`/faktury?upravit=${faktura.id}`} className="text-primary hover:underline">
             Detail v CRM
           </Link>
-          {idokladUrl ? (
-            <a href={idokladUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              Otevřít v iDokladu
+          {pdfUrl ? (
+            <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              Stáhnout PDF faktury
             </a>
           ) : null}
         </div>

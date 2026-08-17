@@ -80,6 +80,8 @@ export interface Faktura {
   datum_duzp: string | null;
   idoklad_id: number | null;
   idoklad_url: string | null;
+  pdf_blob_path: string | null;
+  pdf_url: string | null;
   odeslano_email: string | null;
   odeslano_at: string | null;
   created_at: string;

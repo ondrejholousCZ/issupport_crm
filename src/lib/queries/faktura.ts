@@ -59,14 +59,16 @@ export async function createFaktura(data: {
   vykaz_id?: string;
   idoklad_id?: number;
   idoklad_url?: string;
+  pdf_blob_path?: string;
+  pdf_url?: string;
 }) {
   const result = await query<Faktura>(
     `INSERT INTO faktura (
       cislo_faktury, zakaznik_id, projekt_id, sluzba_id,
       datum_vystaveni, datum_splatnosti, datum_uhrazeni, datum_duzp,
       castka_bez_dph, dph_sazba, castka_celkem, stav, typ_faktury, external_ref,
-      vykaz_id, idoklad_id, idoklad_url
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`,
+      vykaz_id, idoklad_id, idoklad_url, pdf_blob_path, pdf_url
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *`,
     [
       data.cislo_faktury || null,
       data.zakaznik_id,
@@ -85,6 +87,8 @@ export async function createFaktura(data: {
       data.vykaz_id || null,
       data.idoklad_id ?? null,
       data.idoklad_url || null,
+      data.pdf_blob_path || null,
+      data.pdf_url || null,
     ],
   );
   return result.rows[0];
@@ -110,6 +114,8 @@ export async function updateFaktura(
     vykaz_id?: string;
     idoklad_id?: number | null;
     idoklad_url?: string;
+    pdf_blob_path?: string;
+    pdf_url?: string;
   },
 ) {
   const result = await query<Faktura>(
@@ -118,7 +124,8 @@ export async function updateFaktura(
       datum_vystaveni = $6, datum_splatnosti = $7, datum_uhrazeni = $8, datum_duzp = $9,
       castka_bez_dph = $10, dph_sazba = $11, castka_celkem = $12,
       stav = $13, typ_faktury = $14, external_ref = $15,
-      vykaz_id = $16, idoklad_id = $17, idoklad_url = $18
+      vykaz_id = $16, idoklad_id = $17, idoklad_url = $18,
+      pdf_blob_path = $19, pdf_url = $20
      WHERE id = $1 RETURNING *`,
     [
       id,
@@ -139,6 +146,8 @@ export async function updateFaktura(
       data.vykaz_id || null,
       data.idoklad_id ?? null,
       data.idoklad_url || null,
+      data.pdf_blob_path || null,
+      data.pdf_url || null,
     ],
   );
   return result.rows[0];

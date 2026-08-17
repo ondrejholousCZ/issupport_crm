@@ -70,9 +70,12 @@ export function UpravitFakturaModal({
           external_ref: editRow.external_ref ?? editRow.idoklad_id?.toString() ?? "",
           idoklad_id: editRow.idoklad_id,
           idoklad_url: editRow.idoklad_url ?? "",
+          pdf_blob_path: editRow.pdf_blob_path,
+          pdf_url: editRow.pdf_url,
         }}
       />
-      {(editRow.idoklad_id || editRow.idoklad_url) && editRow.stav !== "rozpracovana" ? (
+      {(editRow.pdf_url || editRow.pdf_blob_path || editRow.idoklad_id) &&
+      editRow.stav !== "rozpracovana" ? (
         <FakturaEmailPanel
           faktura={editRow}
           defaultEmail={editRow.zakaznik_fakturacni_email ?? editRow.zakaznik_kontaktni_email ?? ""}

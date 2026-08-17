@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormField, FormGrid, FormSelect } from "@/components/ui/FormField";
-import { normalizeIdokladInvoiceUrl } from "@/lib/idoklad/invoices";
 import { fakturaStavLabels, fakturaTypLabels } from "@/lib/labels";
 
 export type FakturaFormValues = {
@@ -23,6 +22,8 @@ export type FakturaFormValues = {
   external_ref?: string;
   idoklad_id?: number | null;
   idoklad_url?: string;
+  pdf_blob_path?: string | null;
+  pdf_url?: string | null;
 };
 
 type ZakaznikOption = { id: string; nazev: string };
@@ -54,7 +55,7 @@ export function FakturaForm({
     [sluzby, zakaznikId],
   );
 
-  const idokladUrl = normalizeIdokladInvoiceUrl(defaultValues.idoklad_url, defaultValues.idoklad_id);
+  const pdfUrl = defaultValues.pdf_url ?? null;
 
   return (
     <form action={action} className="space-y-4">
@@ -153,10 +154,10 @@ export function FakturaForm({
           defaultValue={defaultValues.external_ref ?? ""}
           hint="ID faktury v iDokladu (vyplní se automaticky)"
         />
-        {idokladUrl ? (
+        {pdfUrl ? (
           <p className="text-sm col-span-2">
-            <a href={idokladUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              Otevřít v iDokladu
+            <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              Stáhnout PDF faktury
             </a>
           </p>
         ) : null}
