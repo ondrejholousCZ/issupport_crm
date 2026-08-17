@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { normalizeIdokladInvoiceUrl } from "@/lib/idoklad/invoices";
 import { issueVykazToIdokladAction } from "@/lib/actions/faktura-vykaz";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormField } from "@/components/ui/FormField";
@@ -18,6 +18,7 @@ export function VykazInvoicePanel({
   faktura: Faktura | null;
 }) {
   if (faktura) {
+    const idokladUrl = normalizeIdokladInvoiceUrl(faktura.idoklad_url, faktura.idoklad_id);
     return (
       <div className="rounded-lg border border-green-200 bg-green-50 p-4 space-y-2 text-sm">
         <p className="font-medium text-green-800">Faktura vystavena</p>
@@ -30,8 +31,8 @@ export function VykazInvoicePanel({
           <Link href={`/faktury?upravit=${faktura.id}`} className="text-primary hover:underline">
             Detail v CRM
           </Link>
-          {faktura.idoklad_url ? (
-            <a href={faktura.idoklad_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          {idokladUrl ? (
+            <a href={idokladUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
               Otevřít v iDokladu
             </a>
           ) : null}

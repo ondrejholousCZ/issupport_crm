@@ -93,7 +93,19 @@ export async function createIssuedInvoice(
 }
 
 export function idokladInvoiceUrl(id: number): string {
-  return `${IDOKLAD_APP_URL}/IssuedInvoice/Edit/${id}`;
+  return `${IDOKLAD_APP_URL}/IssuedInvoice/Edit/${id}/Info`;
+}
+
+/** Opraví starší odkazy uložené bez /Info na konci. */
+export function normalizeIdokladInvoiceUrl(
+  url: string | null | undefined,
+  idokladId?: number | null,
+): string | null {
+  if (idokladId) return idokladInvoiceUrl(idokladId);
+  if (!url) return null;
+  if (url.endsWith("/Info")) return url;
+  if (/\/IssuedInvoice\/Edit\/\d+$/.test(url)) return `${url}/Info`;
+  return url;
 }
 
 export type IdokladInvoiceStatus = {

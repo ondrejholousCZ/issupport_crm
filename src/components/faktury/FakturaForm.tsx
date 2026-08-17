@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormField, FormGrid, FormSelect } from "@/components/ui/FormField";
+import { normalizeIdokladInvoiceUrl } from "@/lib/idoklad/invoices";
 import { fakturaStavLabels, fakturaTypLabels } from "@/lib/labels";
 
 export type FakturaFormValues = {
@@ -20,6 +21,7 @@ export type FakturaFormValues = {
   stav?: string;
   typ_faktury?: string;
   external_ref?: string;
+  idoklad_id?: number | null;
   idoklad_url?: string;
 };
 
@@ -51,6 +53,8 @@ export function FakturaForm({
     () => (zakaznikId ? sluzby.filter((s) => s.zakaznik_id === zakaznikId) : []),
     [sluzby, zakaznikId],
   );
+
+  const idokladUrl = normalizeIdokladInvoiceUrl(defaultValues.idoklad_url, defaultValues.idoklad_id);
 
   return (
     <form action={action} className="space-y-4">
@@ -149,9 +153,9 @@ export function FakturaForm({
           defaultValue={defaultValues.external_ref ?? ""}
           hint="ID faktury v iDokladu (vyplní se automaticky)"
         />
-        {defaultValues.idoklad_url ? (
+        {idokladUrl ? (
           <p className="text-sm col-span-2">
-            <a href={defaultValues.idoklad_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            <a href={idokladUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
               Otevřít v iDokladu
             </a>
           </p>
