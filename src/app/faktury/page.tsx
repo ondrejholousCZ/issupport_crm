@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireSession } from "@/lib/auth/require-session";
-import { formatDate, formatMoney } from "@/lib/format";
+import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
 import { fakturaStavLabels } from "@/lib/labels";
 import { getFaktura, listFaktury } from "@/lib/queries/faktura";
 import { listProjektOptions } from "@/lib/queries/projekt";
@@ -78,6 +78,7 @@ export default async function FakturyPage({
                 <th className="text-left px-4 py-3 font-medium">Splatnost</th>
                 <th className="text-left px-4 py-3 font-medium">Částka</th>
                 <th className="text-left px-4 py-3 font-medium">Stav</th>
+                <th className="text-left px-4 py-3 font-medium">Odesláno</th>
               </tr>
             </thead>
             <tbody>
@@ -101,6 +102,9 @@ export default async function FakturyPage({
                   <td className="px-4 py-3">{formatMoney(row.castka_celkem)}</td>
                   <td className="px-4 py-3">
                     <StatusBadge label={fakturaStavLabels[row.stav]} tone={stavTone(row.stav)} />
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {row.odeslano_at ? formatDateTime(row.odeslano_at) : "—"}
                   </td>
                 </tr>
               ))}

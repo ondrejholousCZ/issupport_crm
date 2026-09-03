@@ -5,7 +5,7 @@ import { FakturaEmailPanel } from "@/components/faktury/FakturaEmailPanel";
 import { issueVykazToIdokladAction } from "@/lib/actions/faktura-vykaz";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { FormField } from "@/components/ui/FormField";
-import { formatMoney } from "@/lib/format";
+import { formatDateTime, formatMoney } from "@/lib/format";
 import type { Faktura } from "@/lib/types";
 import type { InvoiceDraft } from "@/lib/faktura-sablona";
 
@@ -30,6 +30,14 @@ export function VykazInvoicePanel({
           {" · "}
           {formatMoney(faktura.castka_celkem)}
         </p>
+        {faktura.odeslano_at ? (
+          <p>
+            Faktura odeslána: <strong>{formatDateTime(faktura.odeslano_at)}</strong>
+            {faktura.odeslano_email ? ` · ${faktura.odeslano_email}` : null}
+          </p>
+        ) : (
+          <p className="text-amber-800">Faktura ještě nebyla odeslána e-mailem.</p>
+        )}
         <div className="flex flex-wrap gap-2 pt-1">
           <Link href={`/faktury?upravit=${faktura.id}`} className="text-primary hover:underline">
             Detail v CRM

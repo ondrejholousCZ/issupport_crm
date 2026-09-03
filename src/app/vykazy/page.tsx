@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireSession } from "@/lib/auth/require-session";
+import { formatDateTime } from "@/lib/format";
 import { MESICE_LABELS } from "@/lib/prace-filters";
 import { vykazStavLabels } from "@/lib/labels";
 import { getFaktura } from "@/lib/queries/faktura";
@@ -89,6 +90,7 @@ export default async function VykazyPage({
                 <th className="text-left px-4 py-3 font-medium">Příjemce</th>
                 <th className="text-left px-4 py-3 font-medium">Odesláno</th>
                 <th className="text-left px-4 py-3 font-medium">Schváleno</th>
+                <th className="text-left px-4 py-3 font-medium">Faktura odeslána</th>
               </tr>
             </thead>
             <tbody>
@@ -113,6 +115,9 @@ export default async function VykazyPage({
                   <td className="px-4 py-3">{row.odeslano_email ?? "—"}</td>
                   <td className="px-4 py-3">{row.odeslano_at ? new Date(row.odeslano_at).toLocaleDateString("cs-CZ") : "—"}</td>
                   <td className="px-4 py-3">{row.schvaleno_at ? new Date(row.schvaleno_at).toLocaleDateString("cs-CZ") : "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {row.faktura_odeslano_at ? formatDateTime(row.faktura_odeslano_at) : "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>

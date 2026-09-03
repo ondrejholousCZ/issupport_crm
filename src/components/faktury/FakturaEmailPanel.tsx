@@ -3,7 +3,7 @@
 import { sendFakturaEmailAction } from "@/lib/actions/faktura";
 import { FormField } from "@/components/ui/FormField";
 import { SubmitButton } from "@/components/ui/SubmitButton";
-import { formatDate } from "@/lib/format";
+import { formatDateTime } from "@/lib/format";
 import type { Faktura } from "@/lib/types";
 
 export function FakturaEmailPanel({
@@ -35,10 +35,15 @@ export function FakturaEmailPanel({
         hint="Výchozí je fakturační e-mail zákazníka — před odesláním můžete upravit."
       />
       {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
-      {faktura.odeslano_email ? (
-        <p className="text-xs text-gray-500">
-          Naposledy odesláno na <strong>{faktura.odeslano_email}</strong>
-          {faktura.odeslano_at ? ` (${formatDate(faktura.odeslano_at)})` : null}
+      {faktura.odeslano_at ? (
+        <p className="text-sm text-green-800 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+          Faktura odeslána {formatDateTime(faktura.odeslano_at)}
+          {faktura.odeslano_email ? (
+            <>
+              {" "}
+              na <strong>{faktura.odeslano_email}</strong>
+            </>
+          ) : null}
         </p>
       ) : null}
       <SubmitButton>Odeslat fakturu e-mailem</SubmitButton>

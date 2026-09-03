@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { deleteZakaznikAction } from "@/lib/actions/zakaznik";
 import { requireSession } from "@/lib/auth/require-session";
-import { formatDate, formatMoney, formatProjektSazba } from "@/lib/format";
+import { formatDate, formatDateTime, formatMoney, formatProjektSazba } from "@/lib/format";
 import {
   fakturaStavLabels,
   projektStavLabels,
@@ -144,11 +144,12 @@ export default async function ZakaznikDetailPage({
               <EmptyState message="Žádné faktury." />
             ) : (
               <MiniTable
-                headers={["Číslo", "Vystaveno", "Stav"]}
+                headers={["Číslo", "Vystaveno", "Stav", "Odesláno"]}
                 rows={faktury.map((f) => [
                   <Link key={f.id} href={`/faktury?upravit=${f.id}`} className="text-primary hover:underline">{f.cislo_faktury ?? "—"}</Link>,
                   formatDate(f.datum_vystaveni),
                   fakturaStavLabels[f.stav],
+                  f.odeslano_at ? formatDateTime(f.odeslano_at) : "—",
                 ])}
               />
             )}
@@ -159,7 +160,7 @@ export default async function ZakaznikDetailPage({
               <EmptyState message="Žádné výkazy." />
             ) : (
               <MiniTable
-                headers={["Období", "Položek", "Stav", "Příjemce", "Odesláno"]}
+                headers={["Období", "Položek", "Stav", "Příjemce", "Odesláno", "Faktura odeslána"]}
                 rows={vykazy.map((v) => [
                   <Link key={v.id} href={`/vykazy?detail=${v.id}`} className="text-primary hover:underline">
                     {obdobiLabel(v.obdobi)}
@@ -172,6 +173,7 @@ export default async function ZakaznikDetailPage({
                   />,
                   v.odeslano_email ?? "—",
                   v.odeslano_at ? formatDate(v.odeslano_at) : "—",
+                  v.faktura_odeslano_at ? formatDateTime(v.faktura_odeslano_at) : "—",
                 ])}
               />
             )}

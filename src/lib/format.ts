@@ -2,6 +2,16 @@ const czDate = new Intl.DateTimeFormat("cs-CZ", {
   day: "numeric",
   month: "numeric",
   year: "numeric",
+  timeZone: "Europe/Prague",
+});
+
+const czDateTime = new Intl.DateTimeFormat("cs-CZ", {
+  day: "numeric",
+  month: "numeric",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Europe/Prague",
 });
 
 const czMoney = new Intl.NumberFormat("cs-CZ", {
@@ -34,6 +44,14 @@ export function formatDate(value: string | Date | null | undefined): string {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return czDate.format(d);
+}
+
+/** Datum a čas, např. „3. 9. 2026 9:05“. */
+export function formatDateTime(value: string | Date | null | undefined): string {
+  if (!value) return "—";
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return czDateTime.format(d);
 }
 
 const czDateLong = new Intl.DateTimeFormat("cs-CZ", {

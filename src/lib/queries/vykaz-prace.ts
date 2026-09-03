@@ -7,6 +7,7 @@ export type VykazPraceRow = VykazPrace & {
   pocet_polozek?: number;
   celkem_hodiny?: string;
   celkem_castka?: string;
+  faktura_odeslano_at?: string | null;
 };
 
 function newToken(): string {
@@ -49,10 +50,12 @@ export async function listVykazy(filters?: { obdobi?: string; zakaznikId?: strin
   const result = await query<VykazPraceRow>(
     `SELECT v.*,
             z.nazev AS zakaznik_nazev,
-            COUNT(vpp.odvedena_prace_id)::int AS pocet_polozek
+            COUNT(vpp.odvedena_prace_id)::int AS pocet_polozek,
+            MAX(f.odeslano_at) AS faktura_odeslano_at
      FROM vykaz_prace v
      JOIN zakaznik z ON z.id = v.zakaznik_id
      LEFT JOIN vykaz_prace_polozka vpp ON vpp.vykaz_id = v.id
+     LEFT JOIN faktura f ON f.id = v.faktura_id
      ${where}
      GROUP BY v.id, z.nazev
      ORDER BY v.obdobi DESC, v.created_at DESC`,
