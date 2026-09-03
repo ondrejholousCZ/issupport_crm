@@ -1,5 +1,5 @@
 import type { FakturacniJednotka, FakturacniSablona, OdvedenaPrace } from "@/lib/types";
-import { billingUnits } from "@/lib/work-hours";
+import { billingUnits, convertBillingRate, exportCastka } from "@/lib/work-hours";
 
 export type InvoiceDraftLine = {
   projektId: string;
@@ -94,13 +94,47 @@ function jednotkaLabel(jednotka: FakturacniJednotka): string {
 
 function quantityForRows(rows: OdvedenaPrace[], jednotka: FakturacniJednotka): number {
   if (jednotka === "ks") return 1;
+  const unit = jednotka === "md" ? "md" : "hodina";
   let total = 0;
   for (const row of rows) {
-    const projJednotka = row.projekt_jednotka_sazby ?? "hodina";
-    const unit = jednotka === "md" ? "md" : projJednotka;
     total += billingUnits(row.hodiny, row.minuty, unit);
   }
   return Math.round(total * 100) / 100;
+}
+
+function totalCastkaForRows(rows: OdvedenaPrace[]): number {
+  let total = 0;
+  for (const row of rows) {
+    total += exportCastka(
+      row.hodiny,
+      row.minuty,
+      row.projekt_sazba_fak,
+      row.castka_fakturace,
+      row.projekt_jednotka_sazby ?? "hodina",
+    );
+  }
+  return Math.round(total * 100) / 100;
+}
+
+function unitPriceForRows(
+  rows: OdvedenaPrace[],
+  invoiceJednotka: FakturacniJednotka,
+  mnozstvi: number,
+): number {
+  if (invoiceJednotka === "ks") {
+    return totalCastkaForRows(rows);
+  }
+
+  const sample = rows[0];
+  const projectRate = Number(sample?.projekt_sazba_fak ?? 0);
+  const projectUnit = sample?.projekt_jednotka_sazby ?? "hodina";
+  const converted = convertBillingRate(projectRate, projectUnit, invoiceJednotka);
+  if (converted > 0) return converted;
+
+  if (mnozstvi > 0) {
+    return Math.round((totalCastkaForRows(rows) / mnozstvi) * 100) / 100;
+  }
+  return 0;
 }
 
 export function buildInvoiceDraftFromVykaz(input: {
@@ -134,7 +168,7 @@ export function buildInvoiceDraftFromVykaz(input: {
     });
 
     const mnozstvi = quantityForRows(rows, sablona.jednotka);
-    const cenaJednotka = Number(sample.projekt_sazba_fak ?? 0);
+    const cenaJednotka = unitPriceForRows(rows, sablona.jednotka, mnozstvi);
     const dphSazba = Number(sablona.dph_sazba);
     const castkaBezDph = Math.round(mnozstvi * cenaJednotka * 100) / 100;
 

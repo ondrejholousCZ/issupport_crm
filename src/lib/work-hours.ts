@@ -30,6 +30,21 @@ export function computeCastkaFakturace(
   return Math.round(billingUnits(hodiny, minuty, jednotka) * rate * 100) / 100;
 }
 
+export type FakturacniJednotkaSazby = ProjektJednotkaSazby | "ks";
+
+/** Přepočet sazby projektu na jednotku na faktuře (1 MD = 8 h). */
+export function convertBillingRate(
+  rate: number,
+  from: ProjektJednotkaSazby,
+  to: FakturacniJednotkaSazby,
+): number {
+  if (!Number.isFinite(rate) || rate === 0) return 0;
+  if (to === "ks" || to === from) return Math.round(rate * 100) / 100;
+  const hourly = from === "md" ? rate / MD_HOURS : rate;
+  const converted = to === "md" ? hourly * MD_HOURS : hourly;
+  return Math.round(converted * 100) / 100;
+}
+
 /** Excel ukládá čas jako zlomek dne (8 h = 8/24). */
 export function toExcelDayFraction(hodiny: number, minuty: number): number {
   return effectiveWorkHours(hodiny, minuty) / 24;

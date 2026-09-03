@@ -1,3 +1,4 @@
+import { getDefaultBankAccountDetails } from "@/lib/idoklad/bank-accounts";
 import { IDOKLAD_APP_URL, idokladRequest, type IdokladItemResponse } from "@/lib/idoklad/client";
 import { getDefaultIssuedInvoiceSequence } from "@/lib/idoklad/numeric-sequences";
 
@@ -63,14 +64,18 @@ export function buildIdokladInvoiceItem(input: {
 export async function createIssuedInvoice(
   input: CreateIdokladInvoiceInput,
 ): Promise<IdokladIssuedInvoice> {
-  const { numericSequenceId, nextDocumentSerialNumber } = await getDefaultIssuedInvoiceSequence();
+  const currencyId = input.currencyId ?? 1;
+  const [{ numericSequenceId, nextDocumentSerialNumber }, bank] = await Promise.all([
+    getDefaultIssuedInvoiceSequence(),
+    getDefaultBankAccountDetails(currencyId),
+  ]);
   if (!numericSequenceId || !nextDocumentSerialNumber) {
     throw new Error("iDoklad: nelze určit číselnou řadu faktury.");
   }
 
   const payload = {
     PartnerId: input.partnerId,
-    CurrencyId: input.currencyId ?? 1,
+    CurrencyId: currencyId,
     PaymentOptionId: input.paymentOptionId ?? 1,
     NumericSequenceId: numericSequenceId,
     DocumentSerialNumber: String(nextDocumentSerialNumber),
@@ -78,6 +83,10 @@ export async function createIssuedInvoice(
     DateOfMaturity: input.dateOfMaturity,
     DateOfTaxing: input.dateOfTaxing,
     Description: input.description ?? "",
+    AccountNumber: bank.AccountNumber,
+    ...(bank.BankId ? { BankId: bank.BankId } : {}),
+    ...(bank.Iban ? { Iban: bank.Iban } : {}),
+    ...(bank.Swift ? { Swift: bank.Swift } : {}),
     IsEet: false,
     IsIncomeTax: true,
     Items: input.items,
