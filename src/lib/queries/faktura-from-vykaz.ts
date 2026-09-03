@@ -1,5 +1,9 @@
 import { query } from "@/lib/db";
-import { buildInvoiceDraftFromVykaz, type InvoiceDraft } from "@/lib/faktura-sablona";
+import {
+  buildInvoiceDraftFromVykaz,
+  splatnostAfterVystaveni,
+  type InvoiceDraft,
+} from "@/lib/faktura-sablona";
 import { resolvePartnerId } from "@/lib/idoklad/contacts";
 import { downloadIssuedInvoicePdf } from "@/lib/idoklad/pdf";
 import {
@@ -78,7 +82,11 @@ export async function issueVykazToIdoklad(
 
   const datumVystaveni = overrides?.datum_vystaveni ?? draft.datumVystaveni;
   const datumDuzp = overrides?.datum_duzp ?? draft.datumDuzp;
-  const datumSplatnosti = overrides?.datum_splatnosti ?? draft.datumSplatnosti;
+  const datumSplatnosti = splatnostAfterVystaveni(
+    datumVystaveni,
+    overrides?.datum_splatnosti ?? draft.datumSplatnosti,
+    30,
+  );
 
   const lineInputs =
     overrides?.polozky?.map((p, i) => ({

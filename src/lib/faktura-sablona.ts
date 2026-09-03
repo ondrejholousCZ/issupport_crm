@@ -59,12 +59,17 @@ function obdobiParts(obdobi: string): { mesic: string; rok: string } {
   return { rok, mesic: mesicNum ?? "" };
 }
 
-function lastDayOfPreviousMonthForObdobi(obdobi: string): string {
+function parseIsoDate(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+
+/** Poslední den měsíce období výkazu (2026-08 → 2026-08-31). */
+function lastDayOfObdobi(obdobi: string): string {
   const [rokStr, mesicStr] = obdobi.split("-");
   const rok = Number(rokStr);
   const mesic = Number(mesicStr);
-  const d = new Date(rok, mesic - 1, 0);
-  return toIsoDate(d);
+  return toIsoDate(new Date(rok, mesic, 0));
 }
 
 function toIsoDate(d: Date): string {
@@ -72,17 +77,30 @@ function toIsoDate(d: Date): string {
 }
 
 function addDays(iso: string, days: number): string {
-  const d = new Date(iso);
+  const d = parseIsoDate(iso);
   d.setDate(d.getDate() + days);
   return toIsoDate(d);
 }
 
+/** iDoklad vyžaduje splatnost ostře po datu vystavení. */
+export function splatnostAfterVystaveni(
+  datumVystaveni: string,
+  datumSplatnosti: string,
+  splatnostDnu: number,
+): string {
+  if (datumSplatnosti > datumVystaveni) return datumSplatnosti;
+  return addDays(datumVystaveni, Math.max(1, splatnostDnu || 0));
+}
+
 export function computeInvoiceDates(obdobi: string, sablona: Pick<FakturacniSablona, "splatnost_dnu" | "duzp_typ">) {
   const today = toIsoDate(new Date());
-  const duzp =
-    sablona.duzp_typ === "konec_obdobi" ? lastDayOfPreviousMonthForObdobi(obdobi) : today;
+  const duzp = sablona.duzp_typ === "konec_obdobi" ? lastDayOfObdobi(obdobi) : today;
   const datumVystaveni = today;
-  const datumSplatnosti = addDays(duzp, sablona.splatnost_dnu);
+  const datumSplatnosti = splatnostAfterVystaveni(
+    datumVystaveni,
+    addDays(duzp, sablona.splatnost_dnu),
+    sablona.splatnost_dnu,
+  );
   return { datumVystaveni, datumDuzp: duzp, datumSplatnosti };
 }
 
