@@ -19,6 +19,8 @@ export function buildBrandedEmailHtml(input: {
   extraHtml?: string;
   cta?: BrandedEmailCta;
   plainLink?: string;
+  /** Výchozí za tabulkou; u výkazu před tabulkou, ať tlačítko nezmizí na malém displeji. */
+  ctaPlacement?: "after-extra" | "after-details";
   /** Výchozí 640px; výkaz práce používá 832px (+30 %). */
   maxWidth?: number;
   /** Vypne logo v hlavičce (např. když není k dispozici soubor). */
@@ -28,6 +30,7 @@ export function buildBrandedEmailHtml(input: {
   const logoSrc = `cid:${EMAIL_LOGO_CONTENT_ID}`;
   const logoPx = EMAIL_LOGO_DISPLAY_PX;
   const showLogo = !input.hideLogo;
+  const ctaPlacement = input.ctaPlacement ?? "after-extra";
 
   const detailsHtml =
     input.details && input.details.length
@@ -42,7 +45,7 @@ ${input.details
       : "";
 
   const ctaHtml = input.cta
-    ? `<p style="margin:28px 0 16px">
+    ? `<p style="margin:20px 0 24px">
   <a href="${escapeAttr(input.cta.href)}"
      style="display:inline-block;background:#0078d4;color:#fff;padding:10px 20px;border-radius:2px;text-decoration:none;font-weight:600;font-size:15px">
     ${escapeHtml(input.cta.label)} &rsaquo;
@@ -51,8 +54,10 @@ ${input.details
     : "";
 
   const plainLinkHtml = input.plainLink
-    ? `<p style="color:#666;font-size:13px;margin:16px 0 0">Nebo otevřete odkaz: ${escapeHtml(input.plainLink)}</p>`
+    ? `<p style="color:#666;font-size:13px;margin:0 0 24px">Nebo otevřete odkaz: ${escapeHtml(input.plainLink)}</p>`
     : "";
+
+  const ctaBlock = `${ctaHtml}${plainLinkHtml}`;
 
   return `<!DOCTYPE html>
 <html lang="cs">
@@ -81,9 +86,9 @@ ${input.details
       .join("")}
 
     ${detailsHtml}
+    ${ctaPlacement === "after-details" ? ctaBlock : ""}
     ${input.extraHtml ?? ""}
-    ${ctaHtml}
-    ${plainLinkHtml}
+    ${ctaPlacement === "after-extra" ? ctaBlock : ""}
 
     <p style="font-size:15px;line-height:1.6;margin:32px 0 0;color:#111">
       S pozdravem,<br>

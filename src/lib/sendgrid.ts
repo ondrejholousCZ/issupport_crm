@@ -20,7 +20,11 @@ export async function sendEmail({
   attachments?: EmailAttachment[];
 }) {
   const apiKey = process.env.SENDGRID_API_KEY;
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL;
+  const configuredFrom = process.env.SENDGRID_FROM_EMAIL?.trim();
+  const fromEmail =
+    !configuredFrom || configuredFrom.toLowerCase() === "fakturace@issupport.cz"
+      ? "faktury@issupport.cz"
+      : configuredFrom;
   const fromName = process.env.SENDGRID_FROM_NAME ?? "IS Support s. r. o.";
 
   if (!apiKey || !fromEmail) {

@@ -23,6 +23,7 @@
 | `AZURE_AD_TENANT_ID` | Tenant ID |
 | `CRON_SECRET` | `openssl rand -base64 32` |
 | `DAIS_API_BASE_URL` | `https://resvm1.issupport.cz:8443/api/v1` |
+| `SENDGRID_FROM_EMAIL` | `faktury@issupport.cz` (ověřený odesílatel v SendGridu) |
 | `SENDGRID_FROM_NAME` | Např. `ISSP` |
 | `IDOKLAD_CLIENT_ID` | Client ID z iDoklad → Nastavení → Aplikace |
 | `IDOKLAD_CLIENT_SECRET` | Client secret z iDoklad |

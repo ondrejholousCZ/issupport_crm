@@ -98,6 +98,7 @@ export async function sendVykazApprovalEmail({
     ],
     extraHtml: tableHtml,
     cta: { label: "Zobrazit a schválit výkaz", href: approveUrl },
+    ctaPlacement: "after-details",
     plainLink: approveUrl,
   });
 
