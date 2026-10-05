@@ -1,6 +1,6 @@
 -- ============================================================================
 -- ISSP CRM — 00_provision.sql
--- Spustit JEDNOU na serveru resvm1.issupport.cz pod superuserem.
+-- Spustit JEDNOU na serveru 82.208.39.35 pod superuserem.
 -- Databáze apireg už existuje (sdílená s FaktuMatch) — nevytvářet znovu.
 -- ============================================================================
 

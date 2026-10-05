@@ -16,7 +16,7 @@
 | `APP_URL` | Veřejná URL aplikace pro odkazy v e-mailech, např. `https://crm.issupport.cz` |
 | `NEXTAUTH_URL` | Stejná základní URL jako `APP_URL` (bez `/api/auth/...`) |
 | `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
-| `DATABASE_URL` | `postgresql://crmissp:<heslo>@resvm1.issupport.cz:5432/apireg?options=-c%20search_path%3Dcrmissp` |
+| `DATABASE_URL` | `postgresql://crmissp:<heslo>@82.208.39.35:55432/apireg?options=-c%20search_path%3Dcrmissp` |
 | `DATABASE_SSL` | `false` |
 | `AZURE_AD_CLIENT_ID` | Entra App Registration |
 | `AZURE_AD_CLIENT_SECRET` | Client secret |

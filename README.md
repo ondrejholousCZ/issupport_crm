@@ -26,7 +26,7 @@ Aplikace běží na [http://localhost:3000](http://localhost:3000).
 
 | Služba | Hodnota |
 |---|---|
-| PostgreSQL | `apireg` @ resvm1.issupport.cz, schema `crmissp` |
+| PostgreSQL | `apireg` @ 82.208.39.35:55432, schema `crmissp` |
 | Auth | Microsoft Entra ID (stejný tenant jako FaktuMatch) |
 | UI | Desktop-first (mobil/tablet layout ve fázi 2) |
 
@@ -48,17 +48,10 @@ Aplikace běží na [http://localhost:3000](http://localhost:3000).
 
 ## Připojení k DB z lokálu
 
-PostgreSQL na `resvm1` povoluje přímé připojení jen z whitelistovaných IP (Vercel, interní síť).
-Z domova/Macu typicky potřebuješ **SSH tunel**:
-
-```bash
-ssh -L 5432:127.0.0.1:5432 <user>@resvm1.issupport.cz
-```
-
-A v `.env.local` dočasně:
+PostgreSQL běží na `82.208.39.35:55432`. V `.env.local`:
 
 ```
-DATABASE_URL=postgresql://crmissp:<heslo>@127.0.0.1:5432/apireg?options=-c%20search_path%3Dcrmissp
+DATABASE_URL=postgresql://crmissp:<heslo>@82.208.39.35:55432/apireg?options=-c%20search_path%3Dcrmissp
 DATABASE_SSL=false
 ```
 

@@ -34,10 +34,9 @@ ISSP CRM slouží k evidenci:
   ponechává na `faktura` a `odvedena_prace` pole připravená pro pozdější
   napojení (`external_ref`, `stav_fakturace` apod. — viz schéma).
 - **Hosting**: aplikace poběží na **Vercelu**, stejně jako FaktuMatch.
-- **Databázový server**: vlastní PostgreSQL na `resvm1.issupport.cz` (stejný
-  server jako FaktuMatch), ale **nová databáze** `apireg`, **schéma**
-  `crmissp`, **DB uživatel** `crmissp` (samostatná role, samostatné heslo —
-  viz `.env.example` / `CREDENTIALS.md`).
+- **Databázový server**: vlastní PostgreSQL na `82.208.39.35:55432`,
+  databáze `apireg`, **schéma** `crmissp`, **DB uživatel** `crmissp`
+  (samostatná role, samostatné heslo — viz `.env.example` / `CREDENTIALS.md`).
 
 ## 3. Tech stack
 
@@ -47,7 +46,7 @@ ISSP CRM slouží k evidenci:
 | Styling | Tailwind CSS — sdílená design tokeny s FaktuMatch |
 | Auth | NextAuth.js (Auth.js) v5, Credentials provider |
 | DB přístup | Vlastní tenký DB layer nad `pg` (node-postgres), bez ORM — stejně jako FaktuMatch |
-| DB | PostgreSQL, self-hosted na `resvm1.issupport.cz`, databáze `apireg`, schéma `crmissp` |
+| DB | PostgreSQL, self-hosted na `82.208.39.35:55432`, databáze `apireg`, schéma `crmissp` |
 | Hosting | Vercel |
 | Migrace | ruční `.sql` migrační soubory ve `database/migrations` (žádný ORM migration nástroj) |
 
@@ -58,8 +57,8 @@ ISSP CRM slouží k evidenci:
 ## 4. Databázové připojení
 
 ```
-Host:      resvm1.issupport.cz
-Port:      5432
+Host:      82.208.39.35
+Port:      55432
 Database:  apireg
 Schema:    crmissp
 User:      crmissp
@@ -69,7 +68,7 @@ SSL:       podle konfigurace serveru (doporučeno sslmode=require)
 
 Connection string (příklad):
 ```
-DATABASE_URL=postgresql://crmissp:<PASSWORD>@resvm1.issupport.cz:5432/apireg?schema=crmissp&sslmode=require
+DATABASE_URL=postgresql://crmissp:<PASSWORD>@82.208.39.35:55432/apireg?schema=crmissp&sslmode=require
 ```
 
 Nastavení `search_path` na úrovni role, aby nebylo nutné prefixovat každý dotaz:
@@ -78,7 +77,7 @@ ALTER ROLE crmissp SET search_path = crmissp, public;
 ```
 
 **Poznámka k provizi:** databázi `apireg`, schéma `crmissp` a roli `crmissp`
-je potřeba na serveru `resvm1.issupport.cz` reálně založit (viz
+je potřeba na serveru `82.208.39.35` reálně založit (viz
 `database/00_provision.sql`) — vygenerované heslo je pouze návrh, při
 provizi ho nastav skutečně na serveru a ulož do secrets (Vercel env vars),
 nikde do repozitáře.
